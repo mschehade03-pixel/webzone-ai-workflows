@@ -1,0 +1,192 @@
+{
+  "name": "Mod 3 Workflow #4",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": "={{ true }}",
+        "maxResults": 1,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a450901a-802c-4e57-9057-c2fa206bf1bb",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fCr15X4TxyMEfQ2x",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0d8c46d-4d78-4ff7-9db9-0b3b64b541cf",
+              "name": "from",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "15a67418-ffc3-4298-9188-fe657a8c6357",
+              "name": "Subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "a3fa863b-375a-4a05-943f-970f36ca85a0",
+              "name": "body",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "794ba27e-c88a-460e-b4ac-81e409dc5c60",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "mistral:7b",
+          "mode": "list",
+          "cachedResultName": "mistral:7b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.body }}"
+            },
+            {
+              "content": "You are a professional email assistant.\n\nYour task is to draft clear, polite, and professional email replies based solely on the content of the received email.\n\nGuidelines:\n- Reply only using information available in the email.\n- Do not invent names, dates, prices, attachments, or facts.\n- If required information is missing, politely ask the sender for clarification instead of guessing.\n- Match the tone of the original email while remaining professional.\n- Keep responses concise unless the email requires a detailed reply.\n- Preserve the intent of the conversation.\n- Do not include explanations about how you generated the response.\n- Output only the email body, without markdown formatting or code blocks."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "73b41759-7828-4045-a989-0767fc08023f",
+      "name": "Message a model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": "weazm79y",
+        "projectId": "pac937305x25vp1",
+        "table": "mmbc3ua1z34dmkq",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "email",
+              "fieldValue": "={{ $('Edit Fields').item.json.body }}"
+            },
+            {
+              "fieldName": "Subject",
+              "fieldValue": "={{ $('Edit Fields').item.json.Subject }}"
+            },
+            {
+              "fieldName": "reply",
+              "fieldValue": "={{ $json.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        800,
+        0
+      ],
+      "id": "f0e7df37-fa7d-48ac-8e8e-894778d8a13d",
+      "name": "Create a row",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4e3e6666-0e88-4641-817d-03341fe8292e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c965d3155f17b45e6664e548cbf0ada59e490399b10cc5050fe0dbc90f74a1f"
+  },
+  "nodeGroups": [],
+  "id": "xnxrx2qUOxYqcA9M",
+  "tags": []
+}

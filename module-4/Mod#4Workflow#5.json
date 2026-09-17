@@ -1,0 +1,303 @@
+{
+  "name": "Mod#4Workflow#5",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bb6f5ec5-42de-43da-9859-750cfb0b4a5f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1pQO5Ybgxvog_gOHTOwJIjNvK0vCNORjA",
+          "mode": "list",
+          "cachedResultName": "Profile.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1pQO5Ybgxvog_gOHTOwJIjNvK0vCNORjA/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2e3084cb-831c-43ae-bba4-ba8c01468e78",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FQZf76ILaGEIeOTG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "mistral:7b",
+          "mode": "list",
+          "cachedResultName": "mistral:7b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an information extraction system.\n\nExtract the following information from this document\n\nReturn ONLY valid JSON.\n\nDo not include explanations.\nDo not include markdown.\nDo not wrap the JSON in code blocks.\nDo not include any text before or after the JSON.\n\nSchema:\n\n{ \"Document_Type\": \"\",\n  \"Subject\": \"\",\n  \"Summary\": \"\"\n}\n\n-The document_type is one of three types: cv, invoice , form.\n\n-The subject is just a two word description \n\n-The summary should be 2-3 sentences describing the contents of the document.\n\n\n\nthe document:\n\n{{ $json.markdown }}"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "2f81f9f5-d3d0-4a78-bcd5-5ff72f6b97d2",
+      "name": "Message a model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.content);\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        0
+      ],
+      "id": "f73ba3b7-70ab-4ed5-a641-91a25e0295f9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": "weazm79y",
+        "projectId": "pac937305x25vp1",
+        "table": "m83rynh9rxm8a3g",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "Document_Type",
+              "fieldValue": "={{ $json.Document_Type }}"
+            },
+            {
+              "fieldName": "Subject",
+              "fieldValue": "={{ $json.Subject }}"
+            },
+            {
+              "fieldName": "Summary",
+              "fieldValue": "={{ $json.Summary }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        0
+      ],
+      "id": "513ea5c3-6797-4efe-85fb-4d7f1595a337",
+      "name": "Create a row",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mschehade03@gmail.com",
+        "subject": "SUMMARY",
+        "emailType": "text",
+        "message": "={{ $json.Summary }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1808,
+        0
+      ],
+      "id": "d9899400-d2bd-40ec-9da5-3901575c3e7a",
+      "name": "Send a message",
+      "webhookId": "87ae354c-9012-4af0-8500-2e1217bc9828",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9htjcT15jWBjW6Zn",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.eu.llamaindex.ai/api/parsing/upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-1pw13qJG8kIVxeEcazz7QPYceMrxEBi4tceQGznlSpeBkyKH"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f7e7fafc-075a-4307-a490-57d9d7e90954",
+      "name": "POST"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.eu.llamaindex.ai/api/parsing/job/{{ $json.id }}/result/markdown",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-1pw13qJG8kIVxeEcazz7QPYceMrxEBi4tceQGznlSpeBkyKH"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "d0f7f1a8-960d-42ac-a8f4-e9ef7bd8ff45",
+      "name": "GET"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "POST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST": {
+      "main": [
+        [
+          {
+            "node": "GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d2f3b57-2ac9-4eb0-8fc5-cea1512c2070",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c965d3155f17b45e6664e548cbf0ada59e490399b10cc5050fe0dbc90f74a1f"
+  },
+  "nodeGroups": [],
+  "id": "l4dmtV3ZSluxRVNV",
+  "tags": []
+}

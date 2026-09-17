@@ -1,0 +1,443 @@
+{
+  "name": "Geography",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4578b54f-87eb-4f1b-b167-39d64bb899aa",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1aYaIuYYBWhrEF0sP4jXSuRPT7VEHjg9e",
+          "mode": "list",
+          "cachedResultName": "CamScanner 17-08-2026 21.34.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1aYaIuYYBWhrEF0sP4jXSuRPT7VEHjg9e/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a3bee49d-65a1-4064-8eca-6fcf010fc9b6",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FQZf76ILaGEIeOTG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.eu.llamaindex.ai/api/parsing/upload",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer llx-Kn6N62Z5L5UqVeyrGNLtUo9bxN3fmk1I7hpb4Pni1DIUCFjG\"\n}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "premium_mode",
+              "value": "true"
+            },
+            {
+              "name": "language",
+              "value": "ar"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a47281d6-857e-4e33-bbe6-ab9e685eee7a",
+      "name": "Post"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.eu.llamaindex.ai/api/parsing/job/{{ $json.id }}/result/markdown",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-1pw13qJG8kIVxeEcazz7QPYceMrxEBi4tceQGznlSpeBkyKH"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "9c0fd7d3-87b6-4d7c-a1d0-62c8b39cd9f4",
+      "name": "Get"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== n8n Code node — \"Run Once for All Items\" =====\nconst MAX_CHARS = 2000;   // upper bound per chunk\nconst MIN_CHARS = 60;     // below this, a block gets merged into its neighbour\nconst SUBJECT = \"جغرافيا - عالم الشمال والجنوب\";   // TODO: feed from a Set node for subject #2\n\n// ---------- normalisation (NOTE: <br/> is handled per-cell, never globally) ----------\nfunction normalise(text) {\n  return text\n    .replace(/@aliwehbedu/g, '')\n    .replace(/CamScanner/gi, '')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n}\n\n// ---------- table helpers ----------\nconst isTableLine = l => l.trim().startsWith('|');\n\n// positional split — empty cells are KEPT so columns stay aligned with their headers\nfunction cellsOf(line) {\n  const parts = line.split('|');\n  if (parts[0].trim() === '') parts.shift();\n  if (parts.length && parts[parts.length - 1].trim() === '') parts.pop();\n  return parts.map(c =>\n    c.trim().replace(/<br\\s*\\/?>/gi, '\\n').replace(/&#xA;/g, '\\n').trim());\n}\n\nfunction isSeparatorLine(line) {\n  if (!isTableLine(line)) return false;\n  const cells = cellsOf(line).filter(c => c !== '');\n  return cells.length > 0 && cells.every(c => /^:?-{2,}:?$/.test(c));\n}\n\n// a header row is only believable if its cells are short, label-like strings\nfunction isPlausibleHeader(cells) {\n  const filled = cells.filter(c => c !== '');\n  return filled.length > 0 && filled.every(c => c.length <= 40 && !/\\n/.test(c));\n}\n\n// LlamaParse sometimes jams a whole second table into one cell as tab-separated text\nfunction extractJammedTables(cellText) {\n  if (!cellText.includes('\\t')) return null;\n  const marker = cellText.indexOf('---');\n  const residual = marker === -1 ? '' : cellText.slice(0, marker).trim();\n  const blob = marker === -1 ? cellText : cellText.slice(marker + 3);\n  const parts = blob.split('\\t');\n  if (parts.length < 3) return null;\n  const nl = parts[1].indexOf('\\n');\n  if (nl === -1) return null;\n  return {\n    residual,\n    docs: [\n      { title: parts[0].trim(), body: parts[1].slice(nl + 1).trim() },\n      { title: parts[1].slice(0, nl).trim(), body: parts.slice(2).join('\\t').trim() },\n    ],\n  };\n}\n\nconst splitNumberedInline = text => {\n  const p = text.split(/(?=(?:^|\\s)\\d+-\\s)/g).map(x => x.trim()).filter(Boolean);\n  return p.length > 1 ? p : [text];\n};\n\n\n// ---------- HTML tables (LlamaParse emits these instead of pipes on some runs) ----------\nconst hasHtmlTable = s => /<table[\\s>]/i.test(s) || /<t[dr][\\s>]/i.test(s);\n\nfunction htmlToText(html) {\n  return html\n    .replace(/<br\\s*\\/?>/gi, '\\n')\n    .replace(/<\\/(p|div|li|tr)>/gi, '\\n')\n    .replace(/<[^>]+>/g, '')\n    .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')\n    .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')\n    .replace(/&#xA;/gi, '\\n').replace(/&quot;/gi, '\"')\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .split('\\n').map(l => l.trim()).join('\\n')\n    .trim();\n}\n\nfunction parseHtmlTables(section) {\n  const cells = [];                       // {label, text}\n  // Split on OPENING tags instead of matching open/close pairs, so a table that was\n  // truncated mid-way (its </table>, </tr>, </td> cut off by a --- separator) still parses.\n  const tables = section.split(/<table[^>]*>/i).slice(1);\n  tables.forEach(tbl => {\n    let header = null;\n    tbl.split(/<tr[^>]*>/i).slice(1).forEach(tr => {\n      const isHeaderRow = /<th[^>]*>/i.test(tr);\n      const parts = tr.split(/<t[dh][^>]*>/i).slice(1);\n      const texts = parts\n        .map(p => htmlToText(p.replace(/<\\/t[dh]>[\\s\\S]*$/i, '')))\n        .map(t => t.trim());\n      if (!texts.length) return;\n      if (isHeaderRow) { header = texts; return; }\n      texts.forEach((text, ci) => {\n        if (!text || text === '-' || text.replace(/\\s/g, '').length < 3) return;\n        if (text.length < 25 && !/\\d/.test(text)) return;   // bare row-label cell, no content\n        cells.push({ label: header ? (header[ci] || '') : '', text });   // one record PER CELL\n      });\n    });\n  });\n  return cells;\n}\n\n// a whole HTML table cell is usually several numbered topics — split them apart\nfunction splitNumberedBlock(text) {\n  const p = text.split(/(?=^\\s*\\*?\\*?\\d+-\\s)/m).map(x => x.trim()).filter(Boolean);\n  return p.length > 1 ? p : [text];\n}\n\n// ---------- parsers ----------\nfunction parseTableSection(section, title) {\n  const lines = section.split('\\n').filter(isTableLine);\n  const rowsRaw = [], extraDocs = [];\n  let header = null, pendingHeaderLine = null;\n\n  for (let i = 0; i < lines.length; i++) {\n    if (isSeparatorLine(lines[i])) {\n      const cand = pendingHeaderLine ? cellsOf(pendingHeaderLine) : null;\n      if (cand && isPlausibleHeader(cand)) header = cand;\n      else { header = null; if (cand) rowsRaw.push({ cells: cand, header: null }); } // was data, not a header\n      pendingHeaderLine = null;\n      continue;\n    }\n    if (i + 1 < lines.length && isSeparatorLine(lines[i + 1])) { pendingHeaderLine = lines[i]; continue; }\n    rowsRaw.push({ cells: cellsOf(lines[i]), header });\n  }\n\n  const rows = rowsRaw.map(r => ({\n    header: r.header,\n    cells: r.cells.map(c => {\n      const jam = extractJammedTables(c);\n      if (!jam) return c;\n      jam.docs.forEach(d => extraDocs.push(d));\n      return jam.residual;\n    }),\n  }));\n\n  const blocks = rows.map(r =>\n    r.cells.map((cell, ci) => {\n      if (cell === '' || cell === '-') return null;         // skip empty / placeholder cells\n      const label = r.header ? (r.header[ci] || '') : '';\n      return label ? `${label}: ${cell}` : cell;\n    }).filter(Boolean).join('\\n\\n')\n  ).filter(t => t.replace(/\\s/g, '').length > 3);\n\n  return { blocks, extraDocs, title };\n}\n\nfunction parseProseSection(section) {\n  let title = '';\n  const kept = [];\n  section.split('\\n').forEach(l => {\n    const m = l.match(/^#{1,6}\\s+(.*)$/);\n    if (m && !title) { title = m[1].trim(); return; }   // h1 = context, not its own chunk\n    kept.push(l);\n  });\n  const blocks = kept.join('\\n').trim()\n    .split(/(?=^#{2,3}\\s|^\\*\\*-?\\d+[-–.]\\s|^\\d+-\\s)/gm)\n    .map(p => p.trim()).filter(Boolean);\n  return { blocks, title };\n}\n\n// ---------- sizing ----------\nfunction splitOversized(text) {\n  if (text.length <= MAX_CHARS) return [text];\n  const subParts = text.split(/(?=[أ-ي]-\\s)/g).map(p => p.trim()).filter(Boolean);\n  if (subParts.length <= 1) {\n    const out = [];\n    for (let i = 0; i < text.length; i += MAX_CHARS) out.push(text.slice(i, i + MAX_CHARS));\n    return out;\n  }\n  const grouped = []; let buf = '';\n  for (const p of subParts) {\n    if (buf && (buf + '\\n' + p).length > MAX_CHARS) { grouped.push(buf.trim()); buf = p; }\n    else buf = buf ? buf + '\\n' + p : p;\n  }\n  if (buf) grouped.push(buf.trim());\n  return grouped;\n}\n\nfunction mergeTiny(blocks) {\n  const out = [];\n  for (const b of blocks) {\n    if (out.length && (b.length < MIN_CHARS || out[out.length - 1].length < MIN_CHARS))\n      out[out.length - 1] += '\\n\\n' + b;\n    else out.push(b);\n  }\n  return out;\n}\n\n// ---------- main ----------\nconst input = $input.all()[0].json;\nconst cleaned = normalise(input.markdown || input.text || '');\nconst sections = cleaned.split(/\\n-{3,}\\n/).map(s => s.trim()).filter(Boolean);\n\nconst records = [];\nsections.forEach((section, si) => {\n  const hasTable = section.split('\\n').some(isSeparatorLine);\n  const headingsAll = [...section.matchAll(/^#{1,6}\\s+(.*)$/gm)].map(m => m[1].trim());\n\n  if (!hasTable && hasHtmlTable(section)) {\n    parseHtmlTables(section).forEach(cell => {\n      splitNumberedBlock(cell.text).forEach(b =>\n        records.push({\n          section: si,\n          title: headingsAll[0] || '',\n          // the column label is repeated on EVERY block so a chunk can never lose\n          // track of which column (عالم الشمال / عالم الجنوب) it belongs to\n          text: cell.label ? `${cell.label}\\n\\n${b}` : b,\n          type: 'html_table_cell',\n        }));\n    });\n    // GUARD: a section that had real content must never vanish silently\n    if (!records.some(r => r.section === si) && section.replace(/<[^>]+>|\\s/g, '').length > 40) {\n      records.push({ section: si, title: headingsAll[0] || '', text: htmlToText(section), type: 'html_fallback' });\n    }\n    return;\n  }\n\n  if (hasTable) {\n    const headings = [...section.matchAll(/^#{1,6}\\s+(.*)$/gm)].map(m => m[1].trim());\n    const extraDocs = [];\n\n    if (headings.length > 1) {\n      // section holds several titled tables — title each one separately\n      section.split(/^#{1,6}\\s+.*$/gm).filter(p => p.trim()).forEach((part, pi) => {\n        const sub = parseTableSection(part, headings[pi] || '');\n        sub.blocks.forEach(b => records.push({ section: si, title: headings[pi] || '', text: b, type: 'table_row' }));\n        sub.extraDocs.forEach(d => extraDocs.push(d));\n      });\n    } else {\n      const r = parseTableSection(section, headings[0] || '');\n      r.blocks.forEach(b => records.push({ section: si, title: headings[0] || '', text: b, type: 'table_row' }));\n      r.extraDocs.forEach(d => extraDocs.push(d));\n    }\n\n    extraDocs.forEach(d =>\n      splitNumberedInline(d.body).forEach(b =>\n        records.push({ section: si, title: d.title, text: b, type: 'table_row' })));\n  } else {\n    const r = parseProseSection(section);\n    mergeTiny(r.blocks).forEach(b =>\n      records.push({ section: si, title: r.title, text: b, type: 'prose_block' }));\n  }\n});\n\nconst final = [];\nrecords.forEach(r => splitOversized(r.text).forEach(t =>\n  final.push({ ...r, text: r.title ? `${r.title}\\n\\n${t}` : t })));\n\nreturn final\n  .filter(c => c.text.replace(/\\s/g, '').length > 8)\n  .map((c, i) => ({\n    json: {\n      chunk_id: `${SUBJECT.replace(/\\s+/g, '_')}-${c.section}-${i}`,\n      subject: SUBJECT,\n      section_index: c.section,\n      heading: c.title,\n      chunk_type: c.type,\n      text: c.text,\n      char_count: c.text.length,\n    },\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "2583a57f-e3b3-4968-8dd8-4f46979809f3",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "chromaCollection": {
+          "__rl": true,
+          "value": "Geography",
+          "mode": "list",
+          "cachedResultName": "Geography"
+        },
+        "embeddingBatchSize": "=5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreChromaDB",
+      "typeVersion": 1.3,
+      "position": [
+        784,
+        320
+      ],
+      "id": "6afb07f2-cab7-4a94-b424-4f337c0925e1",
+      "name": "Chroma Vector Store",
+      "credentials": {
+        "chromaSelfHostedApi": {
+          "id": "BeMu0w0ae8brjFxp",
+          "name": "ChromaDB Self-Hosted account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen3-embedding:4b"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        736,
+        512
+      ],
+      "id": "d75e767e-bfc9-4433-a4d7-ebfe85188bb0",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        512
+      ],
+      "id": "ed9ef6e7-6d6e-414a-b945-04cec97d19cc",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# موجّه النظام — مساعد المنهج التعليمي (جغرافيا)\n\n**المعرّف:** `curriculum-tutor-ar`\n**الإصدار:** v1.0\n**التاريخ:** 2026-08-29\n**الوجهة:** n8n → AI Agent node → Options → System Message\n**النموذج المستهدف:** qwen3:8b (Ollama)\n\n---\n\n## سجل التغييرات (Changelog)\n\n### v1.0 — 2026-08-29 — الإصدار الأول\nالإصدار الأساسي. يتضمن: حصر الإجابة بالمنهج، أسلوب الإرشاد السقراطي، إعادة توجيه الأسئلة خارج النطاق، وقواعد الأمانة النصّية.\n\n**قواعد الأمانة النصّية (القسم ٣) مبنية على أخطاء موثّقة فعليًا أثناء الاختبار:**\n\n| # | الخطأ الملاحظ | القاعدة المقابلة |\n|---|---|---|\n| 1 | اختلق النموذج ٣ أسباب للاستدانة غير موجودة في الكتاب | ٣-١ ممنوع إضافة ما ليس في النص |\n| 2 | ذكر ٥ عوامل للعولمة من أصل ٦ دون الإشارة إلى النقص | ٣-٢ عدم إكمال قائمة ناقصة + ٣-٤ الإفصاح عن النقص |\n| 3 | أضاف أمثلة (\"الإنترنت، الطائرات\") غير مذكورة في المصدر | ٣-١ + ٣-٣ الحفاظ على الأمثلة المذكورة فقط |\n| 4 | حذف أمثلة واردة في المصدر (\"الفاو\") عند التلخيص | ٣-٣ الحفاظ على الأسماء والأمثلة |\n| 5 | عكَس معنى \"إلغاء اتفاقية الغات\" | ٣-١ الالتزام بالصياغة الأصلية |\n\n---\n\n## النص — انسخ ما تحت هذا السطر إلى حقل System Message\n\nأنت مساعد تعليمي لمادة الجغرافيا ضمن المنهج اللبناني. مهمّتك مساعدة الطلاب على فهم محتوى وحدة \"عالم الشمال وعالم الجنوب\" اعتمادًا **حصريًا** على النصوص المُستخرجة من الكتاب المدرسي التي تصلك مع كل سؤال.\n\n## ١- مصدر المعلومات\n\n- أجب فقط انطلاقًا من النصوص المرفقة المُستخرجة من الكتاب. لا تستعمل معرفتك العامة عن الجغرافيا أو الاقتصاد أو السياسة، حتى لو كنت واثقًا من صحّتها.\n- إذا لم تجد في النصوص المرفقة ما يكفي للإجابة، قل ذلك بوضوح. لا تُكمل النقص من عندك.\n- انتبه إلى التسميات داخل النصوص: عندما يبدأ المقطع بـ \"عالم الشمال:\" فمحتواه يخصّ دول الشمال، و\"عالم الجنوب:\" يخصّ دول الجنوب. لا تنسب خاصية إلى الطرف الخطأ.\n\n## ٢- أسلوب الإرشاد\n\nهدفك أن يفهم الطالب، لا أن يحفظ إجابتك.\n\n- ابدأ بسؤال موجِّه أو تلميح يساعد الطالب على الوصول بنفسه، خاصّة في أسئلة التعليل والاستنتاج (\"لماذا\"، \"علّل\"، \"ما العلاقة بين\").\n- إذا طلب الطالب الإجابة مباشرة، أو قال إنه لا يعرف، أو حاول ولم يصل — **أعطِه الإجابة الكاملة من الكتاب**. لا تُماطل ولا تحجب المعلومة أكثر من مرّة واحدة.\n- في أسئلة التعريف والتعداد المباشرة (\"ما هو\"، \"عدّد\"، \"اذكر\")، أعطِ الإجابة مباشرة ثم اسأل سؤال متابعة قصيرًا يربطها بما قبلها.\n- بعد الإجابة، شجّع الطالب على التطبيق: اطلب منه مثالًا، أو اسأله عن الفرق بين حالتين، أو اطلب منه شرح السبب بكلماته.\n\n## ٣- الأمانة في نقل المحتوى\n\nهذه القواعد أساسية، والإخلال بها خطأ جسيم:\n\n**٣-١** لا تضِف أيّ سبب أو نتيجة أو مثال أو تفصيل غير موجود حرفيًا في النص المرفق — ولو كان صحيحًا في الواقع.\n\n**٣-٢** إذا سأل الطالب عن عدد محدّد (\"أربعة أسباب\"، \"ثلاثة عوامل\") ولم يذكر النص هذا العدد، لا تخترع بنودًا لإكمال العدد. اذكر ما ورد فعلًا وبيّن كم بندًا وجدت.\n\n**٣-٣** حافظ على الأسماء والأمثلة والمصطلحات كما وردت (مثل: اليونسكو، الفاو، آسيان، صندوق النقد، G7). لا تحذفها عند التلخيص ولا تستبدلها بمرادفات.\n\n**٣-٤** إذا بدا النص المرفق ناقصًا أو مقطوعًا، أخبر الطالب أن المادة المتوفّرة لديك عن هذه النقطة غير مكتملة، واقترح عليه مراجعة الكتاب أو أستاذه.\n\n**٣-٥** حافظ على ترقيم الكتاب وترتيبه (١، ٢، ٣ / أ، ب، ج) عند نقل قائمة، ولا تعِد ترقيمها.\n\n## ٤- الأسئلة خارج النطاق\n\nإذا كان السؤال خارج محتوى الوحدة — مادّة أخرى، معلومة عامة، أحداث جارية، أو دردشة لا علاقة لها بالدرس:\n\n- أعِد التوجيه بلُطف ودون إحراج الطالب. لا تقل إن السؤال \"خاطئ\" أو \"ممنوع\".\n- اذكر باختصار ما تستطيع مساعدته فيه، ثم ادعُه إلى سؤال ضمن الوحدة.\n- صيغة مقترحة: «هذا السؤال خارج محتوى وحدة عالم الشمال والجنوب التي أساعدك فيها. أستطيع مساعدتك في مواضيع مثل معايير التصنيف بين الشمال والجنوب، أو العولمة، أو الشركات المتعددة الجنسيات. هل تحبّ أن نبدأ بواحد منها؟»\n- لا تجب عن السؤال الخارجي ولو جزئيًا، ولا تعتذر أكثر من مرّة.\n\n**تنبيه:** إذا كان السؤال ضمن الوحدة لكن النص المرفق لا يغطّيه، فهذه حالة مختلفة عن \"خارج النطاق\". قل إن المعلومة غير متوفّرة في المادة التي بين يديك، ولا تستعمل صيغة إعادة التوجيه أعلاه.\n\n## ٥- اللغة والأسلوب\n\n- أجب بالعربية الفصحى المبسّطة، بلغة يفهمها طالب في المرحلة الثانوية.\n- كن موجزًا: من ٣ إلى ٨ أسطر عادةً، إلا إذا طلب الطالب تفصيلًا أو كان السؤال تعدادًا طويلًا.\n- استعمل التعداد عند نقل قوائم من الكتاب، والنثر عند الشرح والتعليل.\n- كن ودودًا ومشجّعًا، دون مبالغة أو إطراء متكرّر.\n- لا تذكر أبدًا كلمات مثل \"النص المرفق\" أو \"قاعدة البيانات\" أو \"المقاطع المسترجعة\" في كلامك مع الطالب — تحدّث عن \"الكتاب\" أو \"الدرس\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        208
+      ],
+      "id": "64975b04-e81c-46a2-82c3-80f320bc899e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:8b",
+        "options": {
+          "numCtx": 8192
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        16,
+        432
+      ],
+      "id": "1c99b57b-bcad-4a69-8b7b-2d0d018114f9",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        176,
+        432
+      ],
+      "id": "f1834e07-ab70-4628-8ea1-7327fe8e8fe7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "تحتوي هذه الأداة على النصوص الأصلية لوحدة \"عالم الشمال وعالم الجنوب\" (المنهج اللبناني لمادة الجغرافيا)، وتغطّي معايير تصنيف دول العالم والتفاوت بينها والعولمة والتجارة الدولية.\n\nالمواضيع المتوفّرة فيها (مبنية على ما ظهر أثناء الاختبار):\n\nمعايير التصنيف بين عالم الشمال وعالم الجنوب: المؤشرات الاقتصادية والاجتماعية المستخدمة للتمييز بين المجموعتين\nالعولمة: تعريفها، العوامل التي أدّت إلى انتشارها واتساعها\nالتنمية البشرية: دليل التنمية البشرية والمؤشرات الثلاثة التي يتألف منها\nالتفاوت الديموغرافي: العمر المتوقع عند الولادة في عالم الشمال مقابل عالم الجنوب وأسبابه\nاستدانة دول عالم الجنوب: الأسباب التي دفعت هذه الدول إلى الاستدانة\nالتجارة الدولية: الفرق بين التجارة الحرة والتجارة المقيدة، اتفاقية الغات\nالشركات المتعددة الجنسيات: دورها وتأثيرها في الاقتصاد العالمي\nالمنظمات الدولية ذات الصلة: اليونسكو، الفاو، آسيان، صندوق النقد الدولي، مجموعة الدول السبع (G7)\n\nاستدعِ هذه الأداة كلّما تعلّق سؤال الطالب بأيّ من هذه المواضيع، للحصول على النصّ الأصلي من الكتاب قبل صياغة أيّ إجابة. لا تعتمد على معرفتك العامة بالجغرافيا أو الاقتصاد بدلًا منها.",
+        "chromaCollection": {
+          "__rl": true,
+          "value": "Geography",
+          "mode": "list",
+          "cachedResultName": "Geography"
+        },
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreChromaDB",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        432
+      ],
+      "id": "37ef03f0-8d2d-48f0-ae42-e22c82989461",
+      "name": "Chroma Vector Store1",
+      "credentials": {
+        "chromaSelfHostedApi": {
+          "id": "BeMu0w0ae8brjFxp",
+          "name": "ChromaDB Self-Hosted account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        208
+      ],
+      "id": "0646663e-3afa-48ae-9fbe-2edce12d0c02",
+      "name": "When chat message received",
+      "webhookId": "916025e6-58e5-492a-8352-16d264a2206a"
+    },
+    {
+      "parameters": {
+        "model": "qwen3-embedding:4b"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        320,
+        592
+      ],
+      "id": "cc029c01-8668-4c3a-9dfd-d004fbce0d4e",
+      "name": "Embeddings Ollama2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post": {
+      "main": [
+        [
+          {
+            "node": "Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Chroma Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Chroma Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chroma Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Chroma Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chroma Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Chroma Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2b8f5beb-84c7-4060-b93f-1d1ed246ea14",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c965d3155f17b45e6664e548cbf0ada59e490399b10cc5050fe0dbc90f74a1f"
+  },
+  "nodeGroups": [],
+  "id": "w7PMlhANNymoiswo",
+  "tags": []
+}

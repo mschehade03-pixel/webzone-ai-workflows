@@ -1,0 +1,79 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "J9ee7K"
+      },
+      "type": "n8n-nodes-tallyforms.tallyTrigger",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        0
+      ],
+      "id": "5b72127b-82ac-4947-9f66-6aa2035a3216",
+      "name": "Tally Trigger",
+      "webhookId": "ed04291e-586d-4ed4-b3c8-9ee4cc54159d",
+      "notesInFlow": false,
+      "credentials": {
+        "tallyApi": {
+          "id": "mEjUxSHvLL0jpaNu",
+          "name": "Tally account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $json.question_7ZJ7W6.value }}",
+        "toEmail": "={{ $json.question_BBLARK.value }}",
+        "subject": "Workflow#1",
+        "html": "=<h3> New Form Submission Recieved</h3>\n<hr>\n<p><strong>Name:</strong>{{ $json.question_A86AXz.value }}</p>\n<p><strong>Email:</strong>{{ $json.question_BBLARK.value }}</p>\n<p><strong>Message:</strong>{{ $json.question_kZ0KPe.value }}</p>\n<hr>\n<p style=\"font-size: 11px; color: gray;\">sent instantly via n8n</p> ",
+        "options": {
+          "replyTo": "mschehadeh03@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "c8df4de8-1d2a-459c-9325-55c586cf4842",
+      "name": "Send an Email",
+      "webhookId": "0add695f-3025-48df-a745-c731c9e69286",
+      "credentials": {
+        "smtp": {
+          "id": "K3ReztUsXT0YvVZO",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tally Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d6b9165e-56cb-406d-ace1-83fe2cfd36f9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c965d3155f17b45e6664e548cbf0ada59e490399b10cc5050fe0dbc90f74a1f"
+  },
+  "nodeGroups": [],
+  "id": "jxpeGTqRtnBluo1G",
+  "tags": []
+}

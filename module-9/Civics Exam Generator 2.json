@@ -1,0 +1,1723 @@
+{
+  "name": "Civics Exam Generator 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -160
+      ],
+      "id": "d973b5db-83ef-4e44-b4bc-8d24ff1dfdec",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1cGw-z6LzDKlzajkDabbUKA5j31UwM5nJ",
+          "mode": "list",
+          "cachedResultName": "civic_2024_1_canonical.md",
+          "cachedResultUrl": "https://drive.google.com/file/d/1cGw-z6LzDKlzajkDabbUKA5j31UwM5nJ/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        32,
+        -160
+      ],
+      "id": "8949341a-94f2-4b02-a67e-f7ee9991cd48",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "FQZf76ILaGEIeOTG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}\n",
+        "options": {
+          "systemMessage": "="
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        912,
+        256
+      ],
+      "id": "ab0e9e43-210a-4a7c-9972-e919807f206d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:8b",
+        "options": {
+          "numCtx": 8192
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        832,
+        464
+      ],
+      "id": "b1b4c46c-fa31-4511-8b5b-0652a45d9e6f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        976,
+        464
+      ],
+      "id": "a7076ec4-81e9-42ff-9114-075898c886c2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mxw555ll2ahgayl",
+          "mode": "list",
+          "cachedResultName": "nocodb_questions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mxw555ll2ahgayl"
+        },
+        "fieldsMapper": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "exam_id": "={{ $json.exam_id }}",
+            "question_id": "={{ $json.question_id }}",
+            "year": "={{ $json.year }}",
+            "domain": "={{ $json.domain }}",
+            "type": "={{ $json.type }}",
+            "points_max": "={{ $json.points_max }}",
+            "prompt_text": "={{ $json.prompt_text }}",
+            "payload": "={{ JSON.stringify($json.payload) }}",
+            "needs_review": "={{ $json.needs_review }}",
+            "review_notes": "={{ $json.review_notes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "question_id",
+              "displayName": "question_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "exam_id",
+              "displayName": "exam_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "year",
+              "displayName": "year",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "points_max",
+              "displayName": "points_max",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "prompt_text",
+              "displayName": "prompt_text",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "needs_review",
+              "displayName": "needs_review",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "review_notes",
+              "displayName": "review_notes",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        1616,
+        -368
+      ],
+      "id": "d9d8df79-5173-42db-b6df-359fa0324184",
+      "name": "Questions",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "m5ddrcdhqx6fpqx",
+          "mode": "list",
+          "cachedResultName": "nocodb_answers",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/m5ddrcdhqx6fpqx"
+        },
+        "fieldsMapper": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "question_id": "={{ $json.question_id }}",
+            "correct_answer": "={{ JSON.stringify($json.correct_answer) }}",
+            "rubric_raw": "={{ $json.rubric_raw }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "question_id",
+              "displayName": "question_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "correct_answer",
+              "displayName": "correct_answer",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "rubric_raw",
+              "displayName": "rubric_raw",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        1616,
+        -160
+      ],
+      "id": "e68ff3f0-a0ab-48cf-af1c-cc107421fecf",
+      "name": "Answers",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mg1f3834rauhkmi",
+          "mode": "list",
+          "cachedResultName": "nocodb_materials",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mg1f3834rauhkmi"
+        },
+        "fieldsMapper": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "material_id": "={{ $json.material_id }}",
+            "exam_id": "={{ $json.exam_id }}",
+            "domain": "={{ $json.domain }}",
+            "kind": "={{ $json.kind }}",
+            "seq": "={{ $json.seq }}",
+            "text": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "material_id",
+              "displayName": "material_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "exam_id",
+              "displayName": "exam_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "kind",
+              "displayName": "kind",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "seq",
+              "displayName": "seq",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        1616,
+        48
+      ],
+      "id": "d67142c1-c97a-456b-b6cf-1d6faf32b1c3",
+      "name": "Materials",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "تحتوي هذه الأداة على النصوص الأصلية لمادة التربية الوطنية (الصف الثالث ثانوي)، وتغطّي خمسة محاور من المنهج:\n\nالمحور الأول — وسائل الإعلام\n\nالإعلام ودوره في تكوين رأي عام (مفهوم وسائل الإعلام، الرأي العام، السلطة الرابعة)\nالإعلام والحياة الديمقراطية (العقبات المالية والسياسية، قوانين حماية الإعلام)\nحرية الإعلام (مقوماتها، القوانين الراعية لها في لبنان، واقعها، المسؤولية الإعلامية)\nالخُلقيّة الإعلاميّة (مقومات العمل الإعلامي، سلبيات الممارسات، العولمة والأخلاق الإعلامية)\n\nالمحور الثالث — الإنتشار اللبناني في الخارج\n\nالمُغتربون والوطن الأم (أشكال التواصل الرسمية وغير الرسمية، وسائل تفعيل التواصل، الهجرة وأسبابها)\n\nالمحور الخامس — الخدمة العسكرية والمدنية\n\nالجيش اللبناني وتشكيلاته (السياسة الدفاعية، تنظيم الجيش، حالات التدخل للأمن الداخلي)\nقوى الأمن الداخلي (مهامها، تنظيمها)\nمجالات الخدمة المدنية (الصليب الأحمر، الدفاع المدني، المجتمع المدني)\n\nالمحور السادس — المنظمات النقابية والمهنية\n\nالنقابات (مفهومها، أنواعها، دورها)\nقانون العمل (نطاقه، خصائصه)\nعلاقات العمل (عقد العمل الجماعي والفردي)\n\nالمحور الرابع — المُواطن والانتخابات\n\nالديمقراطية والانتخابات (دور الناخب، شروط المشاركة، نسبة المشاركة)\nالانتخابات النيابية (الوكالة النيابية، الدوائر الانتخابية، توزيع المقاعد)\nالانتخابات البلدية (مقارنة مع الانتخابات النيابية، حالات التنافع، انتخابات النقابات)\nأنواع الأنظمة الإنتخابية (الأكثري، النسبي، المختلط، آلية احتساب المقاعد)\n\nاستدعِ هذه الأداة كلّما تعلّق سؤال الطالب بأيّ من هذه المواضيع، للحصول على النصّ الأصلي من الكتاب قبل صياغة أيّ إجابة. لا تعتمد على معرفتك العامة بالتربية الوطنية أو القانون أو السياسة بدلًا",
+        "chromaCollection": {
+          "__rl": true,
+          "value": "Civics",
+          "mode": "list",
+          "cachedResultName": "Civics"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreChromaDB",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        448
+      ],
+      "id": "7008e4c8-7e9b-4a34-bc32-870325e351b1",
+      "name": "Chroma Vector Store",
+      "credentials": {
+        "chromaSelfHostedApi": {
+          "id": "BeMu0w0ae8brjFxp",
+          "name": "ChromaDB Self-Hosted account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen3-embedding:4b"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        592
+      ],
+      "id": "8e596455-4292-4247-ace0-24244c4698ec",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Ask Selection      (Code · Run Once for All Items)\n// Branch: Switch output \"ask_selection\"\n// Parks a `selecting` row so the student's NEXT message (\"2018\") is understood\n// as the year rather than falling through to the tutor.\n// ============================================================\n\nconst r = $('Router').first().json;\nconst now = new Date().toISOString();\nconst prior = r.session || {};\n\n// Numbered, and labelled by sitting — there are two papers for most years now, so a bare\n// \"• 2018\" printed twice is both ambiguous and looks like a duplicate-row bug.\nconst exams = (r.available || []).filter(e => e && e.exam_id);\nconst list = exams.map((e, i) => `${i + 1}. ${e.label || e.year}`).join('\\n');\n\n// An empty list means the questions table came back without usable rows — say so\n// instead of printing a heading with nothing under it, which reads like a bug.\nlet text;\nif (!exams.length) {\n  text = 'لا أجد امتحانات متاحة في الوقت الحالي. حاول مرّة أخرى بعد قليل، أو أخبر المسؤول عن التطبيق.';\n} else if (Array.isArray(r.ambiguous) && r.ambiguous.length > 1) {\n  const which = r.ambiguous\n    .map(e => `${exams.findIndex(x => x.exam_id === e.exam_id) + 1}. ${e.label || e.year}`)\n    .join('\\n');\n  text = `لهذه السنة دورتان. أيّهما تريد؟\\n${which}\\n\\n_اكتب الرقم، أو «عادية» أو «استثنائية»._`;\n} else if (r.unparsed) {\n  text = `لم أتعرّف على اختيارك. اكتب رقم الامتحان من القائمة:\\n${list}`;\n} else {\n  text = `أي امتحان تريد أن تتمرّن عليه؟ اكتب رقمه:\\n${list}`;\n}\n\n// NocoDB updates a row by its own `Id`. Carry it forward when the row already\n// exists, or a mistyped year creates a second `selecting` row instead of\n// updating the first one.\nconst row = {\n  session_id: r.session_id,\n  exam_id: null,\n  question_ids: JSON.stringify([]),\n  current_index: 0,\n  current_question_id: null,\n  score_total: 0,\n  points_total: 0,\n  answers_log: JSON.stringify([]),\n  status: 'selecting',\n  started_at: prior.started_at || now,\n  updated_at: now,\n};\nif (prior.Id != null) row.Id = prior.Id;\n\nreturn [{ json: { action: 'ask_selection', session_row: row, reply_text: text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        624
+      ],
+      "id": "cc7a868b-505a-4c81-81fe-5e755997dc28",
+      "name": "Ask Selection"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mxw555ll2ahgayl",
+          "mode": "list",
+          "cachedResultName": "nocodb_questions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mxw555ll2ahgayl"
+        },
+        "returnAll": true,
+        "options": {
+          "where": "=(exam_id,eq,{{ $json.exam_id }})"
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        1296,
+        752
+      ],
+      "id": "c3fb6bf8-abb1-404b-85ef-71e77fdfb37d",
+      "name": "Get Questions",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mxw555ll2ahgayl",
+          "mode": "list",
+          "cachedResultName": "nocodb_questions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mxw555ll2ahgayl"
+        },
+        "limit": 1,
+        "options": {
+          "where": "=(question_id,eq,{{ $json.current_question_id }})"
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        880,
+        880
+      ],
+      "id": "a555c48e-1088-4451-a283-96b682b1e7c3",
+      "name": "Get Question",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "m5ddrcdhqx6fpqx",
+          "mode": "list",
+          "cachedResultName": "nocodb_answers",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/m5ddrcdhqx6fpqx"
+        },
+        "limit": 1,
+        "options": {
+          "where": "=(question_id,eq,{{ $('Router').first().json.current_question_id }})"
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        1104,
+        944
+      ],
+      "id": "6ebe726d-e015-4a90-9b28-a6a1d87cda7d",
+      "name": "Get Answer",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Grade          (Code · Run Once for All Items)\n// Branch: Switch \"grade\"  ←  after 'Get Question' and 'Get Answer'\n//\n// This is the ONLY node in the workflow that reads the answers table, and it\n// runs after the student has already submitted. Nothing upstream can leak the key.\n// ============================================================\n\n// ---- NocoDB row shape ----------------------------------------------------\n// This NocoDB node wraps every row as { id, id_fields: { Id }, fields: {...} }.\n// Flatten it so columns are readable directly, and lift the primary key to `Id`.\n// Rows that are already flat pass through untouched, so this works either way.\nfunction flat(j) {\n  if (!j || typeof j !== 'object') return {};\n  if (!j.fields || typeof j.fields !== 'object') return j;\n  const out = Object.assign({}, j.fields);\n  if (j.id_fields && j.id_fields.Id != null) out.Id = j.id_fields.Id;\n  else if (j.Id != null) out.Id = j.Id;\n  else if (j.id != null) out.Id = j.id;\n  return out;\n}\n// --------------------------------------------------------------------------\n\nconst r = $('Router').first().json;\nconst question = flat($('Get Question').first().json);\nconst answerRow = flat($('Get Answer').first().json);\nconst studentRaw = String(r.student_answer || '').trim();\n\n// The answer row MUST belong to the question being graded. If `Get Answer` has no\n// Where clause (or a broken one) NocoDB happily returns row 1 of the table, and every\n// question gets marked against someone else's key — silently, as a zero.\nif (answerRow.question_id && question.question_id\n    && String(answerRow.question_id) !== String(question.question_id)) {\n  throw new Error(\n    'Answer/question mismatch: Get Question returned \"' + question.question_id +\n    '\" but Get Answer returned \"' + answerRow.question_id +\n    '\". Check the Where clause on the Get Answer node.');\n}\nif (!answerRow.question_id) {\n  throw new Error('Get Answer returned no row for \"' + question.question_id +\n    '\". Check the Where clause on the Get Answer node.');\n}\n\nconst type = question.type;\nconst pointsMax = Number(question.points_max ?? 0);\nconst parse = (v, f) => { if (v == null) return f; if (typeof v !== 'string') return v;\n  try { return JSON.parse(v); } catch (e) { return f; } };\nconst correct = parse(answerRow.correct_answer, null);\n\nfunction norm(t) {\n  return String(t || '')\n    .replace(/[\\u064B-\\u065F\\u0670]/g, '')              // tashkeel\n    .replace(/[\\u0622\\u0623\\u0625\\u0671]/g, '\\u0627')    // unify alef\n    .replace(/\\u0640/g, '')                            // tatweel: هـ is the letter ه\n    .replace(/\\u0649/g, '\\u064A').replace(/\\u0629/g, '\\u0647')  // alef maqsura, ta marbuta\n    .replace(/[\\u0660-\\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))  // Arabic-Indic digits\n    .replace(/[^\\p{L}\\p{N}\\s]/gu, ' ').replace(/\\s+/g, ' ').trim().toLowerCase();\n}\nfunction stem(w) {\n  let x = w;\n  if (x.length > 3) x = x.replace(/^[\\u0648\\u0641]/, '');\n  if (x.length > 3) x = x.replace(/^[\\u0628\\u0643\\u0644]/, '');\n  if (x.length > 3) x = x.replace(/^\\u0627\\u0644/, '');\n  return x;\n}\nconst toks = t => norm(t).split(' ').filter(w => w.length > 1).map(stem);\nfunction coverage(key, stu) {\n  const kt = toks(key); if (!kt.length) return 0;\n  const st = new Set(toks(stu)); let h = 0;\n  for (const w of kt) if (st.has(w)) h++;\n  return h / kt.length;\n}\n\n// ============================================================\n// CHOICE PARSING — multi-answer aware, and works in both directions\n// ------------------------------------------------------------\n// Three real shapes across the papers, and the old parser handled only the first:\n//\n//   2018 odd_one_out   \"1 - ج   2 - ب   3 - أ\"          label = digit,  answer = ONE letter\n//   2019_2 multi       \"I- أ، ب  II- ب  III- ب، د\"       label = roman,  answer = TWO letters\n//   2019_2 matching    \"أ- 3   ب- 1   ج- 2، 4\"           label = LETTER, answer = digits\n//\n// It captured exactly one letter per label, so «أ، ب» silently became «أ» and a student who\n// answered the question perfectly was marked half wrong. And it could not read the matching\n// direction at all, because there the label is the Arabic letter and the answer is the number.\n//\n// Which side is which is not guessed — it is read off the KEY, which we already have.\n// ------------------------------------------------------------\n// After norm(), أ becomes ا (alef is unified) and ة becomes ه, so the option letters are\n// ا ب ج د ه. Note what is NOT in that set: و. It is the conjunction in «أ و ب», and treating\n// it as an option would turn every two-answer response into a three-answer one. No paper in\n// this set labels an option past ه.\nconst OPTION_LETTERS = new Set(['\\u0627', '\\u0628', '\\u062C', '\\u062F', '\\u0647']);\n\nconst isOptionLetter = w => w.length === 1 && OPTION_LETTERS.has(w);\nconst isDigitTok = w => /^\\d{1,2}$/.test(w);\nconst isRomanTok = w => /^[ivx]{1,4}$/.test(w);\n\n// Does this key answer with numbers (matching) or with letters (everything else)?\nfunction keyValueKind(map) {\n  for (const v of Object.values(map || {})) {\n    for (const one of (Array.isArray(v) ? v : [v])) {\n      if (/^\\s*\\d+\\s*$/.test(String(one))) return 'digit';\n    }\n  }\n  return 'letter';\n}\n\n// Returns { LABEL: [answers…] }, or { __single: [answers…] } when the student gave no labels\n// at all — which is the normal way to answer a one-group question.\nfunction parseChoices(text, valueKind) {\n  const isValue = valueKind === 'digit' ? isDigitTok : isOptionLetter;\n  const isLabel = valueKind === 'digit'\n    ? isOptionLetter                                   // matching: أ- 3\n    : (w => isRomanTok(w) || isDigitTok(w));           // everything else: I- أ  /  1 - ج\n  // The two tests never overlap: when answers are digits the labels are letters, and vice\n  // versa. That is what makes a single left-to-right scan unambiguous.\n\n  const out = {};\n  const loose = [];\n  let cur = null;\n  for (const w of norm(text).split(' ').filter(Boolean)) {\n    if (isLabel(w)) { cur = w.toUpperCase(); if (!out[cur]) out[cur] = []; continue; }\n    if (isValue(w)) { if (cur) out[cur].push(w); else loose.push(w); }\n  }\n  if (Object.keys(out).length) return out;\n  return loose.length ? { __single: loose } : null;\n}\n\nconst ROMAN = ['I','II','III','IV','V','VI','VII'];\nfunction pick(given, label, i, labelCount) {\n  if (!given) return [];\n  // An unlabelled answer can only be meant for a question that has ONE item. Spreading it\n  // across four groups would award the same letters to every group.\n  if (given.__single) return labelCount === 1 ? given.__single : [];\n  // norm(label) matters for the matching direction: the key labels its rows «أ» with the hamza,\n  // while the student's parsed labels have been through norm(), where أ becomes ا. Comparing the\n  // raw forms missed every hamza'd label and quietly dropped that pair's marks.\n  for (const c of [String(label).toUpperCase(), norm(label).toUpperCase(),\n                   String(i + 1), ROMAN[i]]) {\n    if (c && Array.isArray(given[c])) return given[c];\n  }\n  return [];\n}\n\n// Score one item's answer SET against its key SET.\n//\n//   hits   — key answers the student gave\n//   extras — answers the student gave that are not in the key\n//\n// credit = max(0, hits − extras) / |key|\n//\n// The subtraction is what stops «أ ب ج د» — listing everything — from scoring full marks on a\n// two-answer item. One right and one wrong scores zero, which is the same standard the paper\n// itself applies: the ministry's key gives 0.50 for the pair, not 0.25 per letter.\n// A single-answer item is the same formula with |key| = 1, so nothing changes for those.\nfunction scoreSet(keyVal, got) {\n  const K = (Array.isArray(keyVal) ? keyVal : [keyVal])\n    .map(x => norm(String(x))).filter(Boolean);\n  const S = Array.from(new Set((got || []).map(x => norm(String(x))).filter(Boolean)));\n  if (!K.length) return { frac: 0, hits: 0, extras: S.length, key: K, given: S };\n  const ks = new Set(K);\n  let hits = 0, extras = 0;\n  for (const s of S) { if (ks.has(s)) hits++; else extras++; }\n  return { frac: Math.max(0, hits - extras) / K.length, hits, extras, key: K, given: S };\n}\n\nconst fmtSet = v => (Array.isArray(v) ? v : [v]).filter(x => x != null).join('، ');\nconst round2 = n => Math.round(n * 100) / 100;\n\nconst breakdown = [];\nlet score = null, needsLlm = false, llmPayload = null;\n\n// A question whose key is a label→answer map: matching, odd_one_out, mcq_single, mcq_multi.\n// Parse Canonical emits every label key the same way — { by_label, by_label_points } — so that\n// per-item marks have somewhere to live. Rows extracted by the old LLM path store the bare map\n// for odd_one_out/mcq instead, so fall back to it and keep those rows working.\nconst LABEL_TYPES = ['matching', 'odd_one_out', 'mcq_single', 'mcq_multi'];\nconst labelMap = (LABEL_TYPES.indexOf(type) === -1) ? null\n  : (correct && correct.by_label)\n    || (type !== 'matching' && correct && !correct.acceptable_elements\n        && !correct.required_components && !('verdict' in correct) ? correct : null);\n\nif (r.skipped || !studentRaw) {\n  score = 0;\n  breakdown.push({ item: null, note: 'skipped_or_empty', awarded: 0 });\n\n} else if (labelMap && Object.keys(labelMap).length) {\n  const labels = Object.keys(labelMap);\n  // Per-item marks when the key states them — 2019_2's matching is 0.50 / 0.50 / 1.00, because\n  // its third pair has two answers. Splitting pointsMax evenly would pay 0.67 for each and\n  // quietly under-mark the one that is worth double. Falls back to an even split.\n  const perMap = (correct && (correct.by_label_points || correct.points_by_label)) || null;\n  const evenPer = pointsMax / labels.length;\n\n  const given = parseChoices(studentRaw, keyValueKind(labelMap));\n  let aw = 0;\n  labels.forEach((L, i) => {\n    const per = (perMap && perMap[L] != null) ? Number(perMap[L]) : evenPer;\n    const got = pick(given, L, i, labels.length);\n    const s = scoreSet(labelMap[L], got);\n    const awarded = round2(per * s.frac);\n    aw += awarded;\n    breakdown.push({\n      item: L,\n      expected: fmtSet(labelMap[L]),\n      got: s.given.length ? fmtSet(s.given) : null,\n      hits: s.hits, extras: s.extras,\n      awarded,\n      points_max: round2(per),\n    });\n  });\n  score = round2(aw);\n\n} else if (type === 'correction' && correct) {\n  // What actually has to be corrected is whatever appears in the model answer but NOT\n  // in the question — here, العامة. Scoring against the whole corrected sentence instead\n  // fails any student who answers concisely, which is most of them: \"المصلحة العامة\" is\n  // a perfectly correct answer and used to score zero.\n  const promptTokens = new Set(toks(question.prompt_text || ''));\n  const es = Object.entries(correct), per = pointsMax / es.length;\n  let aw = 0;\n  es.forEach(([L, p]) => {\n    const want = (p && p.correct) || '';\n    const keyTokens = toks(want).filter(t => !promptTokens.has(t));\n\n    let cov, basis;\n    if (keyTokens.length) {\n      const st = new Set(toks(studentRaw));\n      cov = keyTokens.filter(t => st.has(t)).length / keyTokens.length;\n      basis = 'key_terms';\n    } else {\n      // Model answer adds no new words (rare) — fall back to the whole sentence.\n      cov = coverage(want, studentRaw);\n      basis = 'full_sentence';\n    }\n    const ok = cov >= 0.6;\n    if (ok) aw += per;\n    breakdown.push({ item: L, expected: want, basis,\n      key_terms: keyTokens, coverage: round2(cov), awarded: ok ? per : 0 });\n  });\n  score = round2(aw);\n\n} else if (type === 'true_false' && correct && 'verdict' in correct) {\n  // صح / خطأ, plus the correction when the verdict is خطأ. Both halves are required: a student\n  // who says خطأ without saying what the right wording is has not finished the question.\n  const saidTrue = /(?:^|\\s)(\\u0635\\u062D|\\u0635\\u062D\\u064A\\u062D\\u0647?)(?:\\s|$)/.test(norm(studentRaw));\n  const saidFalse = /(?:^|\\s)(\\u062E\\u0637\\u0627|\\u063A\\u0644\\u0637)(?:\\s|$)/.test(norm(studentRaw));\n  const wantTrue = norm(correct.verdict).indexOf('\\u0635\\u062D') === 0;\n  const verdictOk = wantTrue ? (saidTrue && !saidFalse) : (saidFalse && !saidTrue);\n\n  if (!correct.correct) {\n    score = verdictOk ? pointsMax : 0;\n    breakdown.push({ item: 'verdict', expected: correct.verdict,\n      got: saidTrue ? 'صح' : (saidFalse ? 'خطأ' : null), awarded: score });\n  } else {\n    const half = pointsMax / 2;\n    const cov = coverage(correct.correct, studentRaw);\n    const corrOk = cov >= 0.5;\n    score = round2((verdictOk ? half : 0) + (corrOk ? half : 0));\n    breakdown.push({ item: 'verdict', expected: correct.verdict,\n      got: saidTrue ? 'صح' : (saidFalse ? 'خطأ' : null),\n      awarded: verdictOk ? half : 0 });\n    breakdown.push({ item: 'correction', expected: correct.correct,\n      coverage: round2(cov), awarded: corrOk ? half : 0 });\n  }\n\n} else {\n  needsLlm = true;\n  let els = (correct && correct.acceptable_elements) || [];\n  let req = (correct && correct.required_count) || null;\n\n  // Some rubrics are shaped as required_components (e.g. \"present each document:\n  // type / source / main idea\") rather than a flat list of acceptable elements.\n  // Without this, the LLM is handed an EMPTY rubric and scores every such answer 0 —\n  // which is what happened to the \"قدم كلا من المستندين\" question.\n  if (!els.length && correct && Array.isArray(correct.required_components)) {\n    const flatEls = [];\n    correct.required_components.forEach(g => {\n      (g.components || []).forEach(c => {\n        const label = [g.group, c.label].filter(Boolean).join(' — ');\n        flatEls.push(label ? label + ': ' + c.value : String(c.value));\n      });\n    });\n    if (flatEls.length) {\n      els = flatEls;\n      req = flatEls.length;   // every component is required, not \"any N of\"\n    }\n  }\n  const scored = els.map(e => ({ element: e, coverage: round2(coverage(e, studentRaw)) }))\n    .sort((a, b) => b.coverage - a.coverage);\n  const likely = scored.filter(s => s.coverage >= 0.5).map(s => s.element);\n  llmPayload = {\n    prompt_text: question.prompt_text,\n    student_answer: studentRaw,\n    points_max: pointsMax,\n    required_count: req,\n    acceptable_elements: els,\n    required_components: (correct && correct.required_components) || null,\n    likely_matches: likely,\n  };\n  breakdown.push(...scored.slice(0, 8));\n  // provisional mark the LLM can override\n  score = req ? round2(Math.min(likely.length, req) * (pointsMax / req)) : null;\n}\n\n// ---- a readable \"the correct answer is…\" line, shown whether they were right or wrong ----\nlet modelAnswer = '';\nif (correct) {\n  if (labelMap) {\n    const arrow = (type === 'matching') ? ' ← ' : ': ';\n    modelAnswer = Object.entries(labelMap)\n      .map(([k, v]) => `${k}${arrow}${fmtSet(v)}`).join('  ·  ');\n  } else if (type === 'correction') {\n    modelAnswer = Object.values(correct)\n      .map(p => `${p.wrong} ← ${p.correct}`).join('\\n');\n  } else if ('verdict' in correct) {\n    modelAnswer = correct.correct\n      ? `${correct.verdict}\\n${correct.correct}` : String(correct.verdict);\n  } else if (correct.acceptable_elements) {\n    const need = correct.required_count;\n    modelAnswer = (need ? `المطلوب ${need} من:\\n` : '')\n      + correct.acceptable_elements.map(e => `• ${e}`).join('\\n');\n  } else if (correct.required_components) {\n    modelAnswer = correct.required_components.map(g =>\n      `${g.group}:\\n` + g.components.map(c => `• ${c.label}: ${c.value}`).join('\\n')).join('\\n\\n');\n  }\n}\n\nreturn [{\n  json: {\n    action: 'grade',\n    model_answer: modelAnswer,\n    question_id: question.question_id,\n    type, points_max: pointsMax,\n    score, needs_llm: needsLlm, llm_payload: llmPayload,\n    breakdown, student_answer: studentRaw,\n    skipped: Boolean(r.skipped),\n    // flattened for the LLM node's prompt expressions\n    q_prompt: question.prompt_text || '',\n    q_elements: llmPayload ? (llmPayload.acceptable_elements || []).join(' | ') : '',\n    q_required: llmPayload ? (llmPayload.required_count || '') : '',\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        1024
+      ],
+      "id": "4e38e6e7-9713-4956-867a-cca33d0118b3",
+      "name": "Grade"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "passthrough",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0b2b2e1b-e3ad-4346-aba1-b31b81df4b17"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "passthrough"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e77c7583-bbfd-4bc8-89f3-f733704df05a",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "ask_selection",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ask_selection"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "09cded11-cca7-423c-a53e-061d791dbeda",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2436b500-411f-455c-a064-15ea605b8b58",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "grade",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "grade"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ba4b8215-47c7-4cf8-a6b5-609f9f5bd25c",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "serve_next",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "serve_next"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d3a5cb90-9a79-4c38-96be-ee7fc3040ea1",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "finish",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "finish"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        752
+      ],
+      "id": "3ddce879-721e-4d1c-8046-e2ff32dfc318",
+      "name": "Route"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Router          (Code · Run Once for All Items)\n// ------------------------------------------------------------\n// Reads three upstream nodes by name. Those names must match EXACTLY:\n//   'Chat Trigger'  · 'Get Session'  · 'List Exams'\n// Outputs `action`, which the Switch routes on.\n// Never touches the answers table.\n// ============================================================\n\n// ---- NocoDB row shape ----------------------------------------------------\n// This NocoDB node wraps every row as { id, id_fields: { Id }, fields: {...} }.\n// Flatten it so columns are readable directly, and lift the primary key to `Id`.\n// Rows that are already flat pass through untouched, so this works either way.\nfunction flat(j) {\n  if (!j || typeof j !== 'object') return {};\n  if (!j.fields || typeof j.fields !== 'object') return j;\n  const out = Object.assign({}, j.fields);\n  if (j.id_fields && j.id_fields.Id != null) out.Id = j.id_fields.Id;\n  else if (j.Id != null) out.Id = j.Id;\n  else if (j.id != null) out.Id = j.id;\n  return out;\n}\n// --------------------------------------------------------------------------\n\nconst trigger = $('Chat Trigger').first().json;\nconst message = String(trigger.chatInput ?? trigger.message ?? trigger.text ?? '').trim();\nconst sessionId = String(trigger.sessionId ?? trigger.session_id ?? 'anon');\n\n// Get Session is a \"Get Many\" with a where-clause, so it returns 0 or 1 rows.\nlet session = null;\ntry {\n  const rows = $('Get Session').all().map(i => flat(i.json)).filter(r => r && r.session_id);\n  session = rows[0] || null;\n} catch (e) { session = null; }\n\n// List Exams returns every question row's exam_id/year — collapse to distinct exams.\n// Column names are read case-insensitively, and a missing `year` is recovered from\n// the exam_id itself (civic_2018_1 → 2018) so one mistyped field option in the\n// NocoDB node can't leave the student staring at an empty list.\nfunction pick(row, name) {\n  if (row[name] != null) return row[name];\n  const want = name.toLowerCase();\n  for (const k of Object.keys(row)) if (k.toLowerCase() === want) return row[k];\n  return null;\n}\n\nlet available = [];\ntry {\n  const seen = new Set();\n  $('List Exams').all().forEach(i => {\n    const row = flat(i.json);\n    const examId = pick(row, 'exam_id');\n    if (!examId || seen.has(examId)) return;\n    seen.add(examId);\n    let yr = String(pick(row, 'year') ?? '').trim();\n    if (!/^(19|20)\\d{2}$/.test(yr)) {\n      const m = String(examId).match(/(19|20)\\d{2}/);\n      yr = m ? m[0] : '';\n    }\n    // The suffix says which sitting it was: _1 عادية, _2 استثنائية. With seven papers across\n    // four years the YEAR alone no longer identifies an exam, so carry the sitting too.\n    const sess = String(examId).match(/_(\\d+)$/);\n    available.push({\n      exam_id: examId,\n      year: yr,\n      session: sess ? Number(sess[1]) : null,\n      label: yr + (sess && Number(sess[1]) === 2\n        ? ' \\u2014 \\u0627\\u0644\\u062F\\u0648\\u0631\\u0629 \\u0627\\u0644\\u0627\\u0633\\u062A\\u062B\\u0646\\u0627\\u0626\\u064A\\u0629'\n        : ' \\u2014 \\u0627\\u0644\\u062F\\u0648\\u0631\\u0629 \\u0627\\u0644\\u0639\\u0627\\u062F\\u064A\\u0629'),\n    });\n  });\n} catch (e) { available = []; }\navailable.sort((a, b) => String(b.year).localeCompare(String(a.year))\n  || (a.session || 0) - (b.session || 0));\n\n// Fold every spelling variant a student might type down to one form. The patterns\n// below are written in this normalised form — e.g. `اسئله`, not `أسئلة`.\nconst norm = s => String(s || '')\n  .replace(/[\\u064B-\\u065F\\u0670]/g, '')               // tashkeel\n  .replace(/[\\u0622\\u0623\\u0625\\u0671]/g, '\\u0627')     // آ أ إ ٱ → ا\n  .replace(/\\u0629/g, '\\u0647')                         // ة → ه\n  .replace(/\\u0649/g, '\\u064A')                         // ى → ي\n  .replace(/\\u0624/g, '\\u0648')                         // ؤ → و\n  .replace(/\\u0626/g, '\\u064A')                         // ئ → ي\n  .replace(/[\\u0660-\\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))  // ٠-٩ → 0-9\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .toLowerCase();\n\nconst m = norm(message);\nconst WANTS_EXAM = /(امتحان|مسابقه|اسئله|سيله|تمرين|تدرب|تمرن|فحص|exam|quiz|test|practice)/.test(m);\nconst WANTS_STOP = /(انهاء|انهي|توقف|وقف|كفي|خلص|بطل|stop|end|quit|exit)/.test(m);\nconst WANTS_SKIP = /(تخطي|تخط|تجاوز|مرق|skip)/.test(m);\n// An explicit escape hatch so a student can ask for help mid-exam without it\n// being marked as their answer.\nconst WANTS_HELP = /^(سوال|اسال|اساله|ساعدني|وضحلي|help|ask)\\s*[:：]/.test(m);\n// \"yes, next question\" — only consulted while waiting for the student to continue.\n// Two tiers, because some yes-words are also ordinary words.\n//  STRONG — unambiguous; may be followed by more text (\"نعم كمل من فضلك\").\n//  BARE   — only counts as yes when it IS the whole message; \"اي\" opens \"اي شي تاني\",\n//           \"تمام\" opens \"تمام بس ما فهمت\", and neither of those means \"next question\".\n// \\b is useless here: it only knows [A-Za-z0-9_] and never matches after an Arabic letter.\nconst STRONG = '(ايوه|ايه|اكيد|التالي|نعم|كملي|كمل|تابع|okay|yes|yep|next)';\nconst BARE = '(اي|اجل|طبعا|تمام|ماشي|هيا|يلا|ok|go|y)';\nconst SAYS_YES = new RegExp('^' + STRONG + '(?![\\\\u0621-\\\\u064A\\\\w])').test(m)\n  || new RegExp('^' + BARE + '$').test(m)\n  || /(نعم|كمل|تابع|السوال التالي|next question)/.test(m);\n\nfunction parseSelection(text) {\n  const t = norm(text);\n  const y = t.match(/\\b(19|20)\\d{2}\\b/);\n  // A bare small number is the student picking a line off the numbered list. Only counts when\n  // it is the WHOLE message, so \"2018\" is never mistaken for item 2018 and a year inside a\n  // sentence is never mistaken for an index.\n  const idx = /^\\s*([1-9]\\d?)\\s*$/.exec(t);\n  // \"عادية\" / \"استثنائية\", or the shapes 2018-1 / 2018/2 that people type naturally.\n  let sitting = null;\n  // Written in the NORMALISED form, as the comment on norm() insists: ئ becomes ي and ى becomes\n  // ي, so «استثنائية» arrives here as «استثناييه». Spelling these the natural way silently\n  // matched nothing.\n  if (/(عاديه|الاولي|اولي|first)/.test(t)) sitting = 1;\n  if (/(استثنايي|الثانيه|ثانيه|second)/.test(t)) sitting = 2;\n  const dashed = t.match(/\\b(?:19|20)\\d{2}\\s*[-\\/]\\s*([12])\\b/);\n  if (dashed) sitting = Number(dashed[1]);\n  return {\n    year: y ? y[0] : null,\n    subject: /(تربيه|وطنيه|مدنيه|civic)/.test(t) ? 'civic' : null,\n    index: (idx && !y) ? Number(idx[1]) : null,\n    sitting,\n  };\n}\n\nfunction out(action, extra) {\n  return [{\n    json: Object.assign({\n      action,\n      session_id: sessionId,\n      message,\n      // The AI Agent's \"take from previous node automatically\" looks for `chatInput`.\n      // It used to sit right after the Chat Trigger and get it for free; behind the\n      // Router it sees this item instead, so pass the student's words through.\n      chatInput: message,\n      available,\n    }, extra || {}),\n  }];\n}\n\n// 1 — an active exam claims the turn\nif (session && session.status === 'active') {\n  if (WANTS_STOP) return out('finish', { session });\n  if (WANTS_HELP) return out('passthrough', { session });\n  if (WANTS_SKIP) {\n    return out('grade', { session, student_answer: '', skipped: true,\n      current_question_id: session.current_question_id });\n  }\n  return out('grade', { session, student_answer: message,\n    current_question_id: session.current_question_id });\n}\n\n// 2 — graded, waiting for \"yes, next question\"\nif (session && session.status === 'awaiting_next') {\n  if (WANTS_STOP) return out('finish', { session });\n  if (SAYS_YES) return out('serve_next', { session });\n  // Anything else is a follow-up about the answer they just saw — let the tutor take it.\n  // The session stays in awaiting_next, so \"نعم\" still works on the turn after.\n  return out('passthrough', { session });\n}\n\n// 3 — waiting for the student to name subject + year\nif (session && session.status === 'selecting') {\n  if (WANTS_STOP) return out('finish', { session });\n  const { year, subject, index, sitting } = parseSelection(message);\n\n  // Picking a line off the numbered list.\n  if (index && index <= available.length) {\n    const e = available[index - 1];\n    return out('start', { session, exam_id: e.exam_id, year: e.year });\n  }\n  // Nothing recognisable in the message — re-ask. Without this guard the find()\n  // below matches on all-null criteria and silently starts whichever exam is first.\n  if (!year && !subject) return out('ask_selection', { session, unparsed: true });\n\n  const matches = available.filter(e =>\n    (!year || String(e.year) === year)\n    && (!subject || String(e.exam_id).startsWith(subject))\n    && (!sitting || e.session === sitting));\n  if (!matches.length) return out('ask_selection', { session, unparsed: true });\n  // A year with two sittings is not a choice — ask which, rather than silently taking the first.\n  if (matches.length > 1) return out('ask_selection', { session, ambiguous: matches });\n  return out('start', { session, exam_id: matches[0].exam_id, year: matches[0].year });\n}\n\n// 4 — no exam in progress\nif (WANTS_EXAM) {\n  const { year, subject, sitting } = parseSelection(message);\n  const matches = available.filter(e =>\n    year && String(e.year) === year\n    && (!subject || String(e.exam_id).startsWith(subject))\n    && (!sitting || e.session === sitting));\n  if (matches.length === 1) return out('start', { exam_id: matches[0].exam_id, year: matches[0].year });\n  if (matches.length > 1) return out('ask_selection', { ambiguous: matches });\n  return out('ask_selection', {});\n}\n\nreturn out('passthrough', { session });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        816
+      ],
+      "id": "f8ff3a58-4827-4709-a7dd-1d02b8ced492",
+      "name": "Router"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mnmxnsp5svspyai",
+          "mode": "list",
+          "cachedResultName": "nocodb_exam_sessions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mnmxnsp5svspyai"
+        },
+        "limit": 1,
+        "options": {
+          "where": "=(session_id,eq,{{ $('Chat Trigger').item.json.sessionId }})"
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        16,
+        816
+      ],
+      "id": "63aacfa6-a5b5-4bba-ae99-c278026bb58d",
+      "name": "Get Session",
+      "alwaysOutputData": true,
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mxw555ll2ahgayl",
+          "mode": "list",
+          "cachedResultName": "nocodb_questions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mxw555ll2ahgayl"
+        },
+        "returnAll": true,
+        "options": {
+          "fields": [
+            "c1xu8v5tw0dut2w",
+            "c95o3v96rxfkbyg"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        -192,
+        816
+      ],
+      "id": "07ddbedf-3be9-45e6-98a6-3f0b5dcba40e",
+      "name": "List Exams",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -400,
+        816
+      ],
+      "id": "775ebe4d-3a4a-4d07-94c1-4a2ccab55228",
+      "name": "Chat Trigger",
+      "webhookId": "9ca6a18b-0a01-44b2-9dd1-20479f53be02"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        1184
+      ],
+      "id": "4ee29ebf-80b6-48eb-802d-dd16154fbefe",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CZhA4Ndohoyp99EL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Finalize        (Code · Run Once for All Items)\n// Branch: Switch \"grade\"  ←  after 'Grade' (and after 'Feedback LLM' when it ran)\n// Records the mark, advances the index, and picks the next question.\n// ============================================================\n\nconst r = $('Router').first().json;\nconst g = $('Grade').first().json;\nconst prior = r.session || {};\nconst now = new Date().toISOString();\n\nconst parse = (v, f) => { if (v == null) return f; if (typeof v !== 'string') return v;\n  try { return JSON.parse(v); } catch (e) { return f; } };\n\n// If the LLM branch ran, take its mark; otherwise the code's mark stands.\n// Pull the last well-formed JSON object out of a model reply. A greedy\n// /\\{[\\s\\S]*\\}/ fails the moment the model wraps its answer in <think> tags or\n// prose containing braces — qwen3 does both — so scan brace-balanced candidates\n// from the end and take the first one that actually parses.\nfunction extractJson(text) {\n  const clean = String(text)\n    .replace(/<think>[\\s\\S]*?<\\/think>/gi, '')\n    .replace(/```(?:json)?/gi, '');\n  const starts = [];\n  for (let i = 0; i < clean.length; i++) if (clean[i] === '{') starts.push(i);\n  for (let s = starts.length - 1; s >= 0; s--) {\n    let depth = 0, inStr = false, esc = false;\n    for (let i = starts[s]; i < clean.length; i++) {\n      const c = clean[i];\n      if (esc) { esc = false; continue; }\n      if (c === '\\\\') { esc = true; continue; }\n      if (c === '\"') { inStr = !inStr; continue; }\n      if (inStr) continue;\n      if (c === '{') depth++;\n      else if (c === '}') {\n        depth--;\n        if (depth === 0) {\n          try { return JSON.parse(clean.slice(starts[s], i + 1)); } catch (e) { }\n          break;\n        }\n      }\n    }\n  }\n  return null;\n}\n\n// Rescue readable Arabic feedback from a reply that wasn't valid JSON.\nfunction salvage(text) {\n  const stripped = String(text).replace(/<think>[\\s\\S]*?<\\/think>/gi, '');\n  const kept = stripped.split('\\n').filter(line => {\n    const t = line.trim();\n    if (!t) return false;\n    // Drop lines that are mostly Latin script — that's the model thinking, not feedback.\n    const ar = (t.match(/[\\u0600-\\u06FF]/g) || []).length;\n    const la = (t.match(/[A-Za-z]/g) || []).length;\n    if (la >= ar) return false;\n    // Drop bare headings the model likes to insert.\n    if (/^(التحليل|النتيجة|الشرح|الاجابة|الإجابة|التقييم)\\s*:?\\s*$/.test(t)) return false;\n    return true;\n  });\n  let out = kept.join(' ').replace(/\\s+/g, ' ').trim();\n  if (!out) return null;\n  const sentences = out.match(/[^.!\\u061F]+[.!\\u061F]?/g) || [out];\n  out = sentences.slice(0, 3).join(' ').trim();\n  if (out.length > 400) out = out.slice(0, 400).replace(/\\s\\S*$/, '') + '\\u2026';\n  return out || null;\n}\n\nlet awarded = Number(g.score ?? 0);\nlet feedback = null;\nif (g.needs_llm) {\n  try {\n    const raw = $('Feedback LLM').first().json;\n    const txt = raw.text ?? raw.output ?? raw.response ?? '';\n    const j = extractJson(txt);\n    if (j) {\n      if (typeof j.score === 'number' && isFinite(j.score)) {\n        awarded = Math.max(0, Math.min(g.points_max, j.score));\n      }\n      feedback = j.feedback || null;\n    } else {\n      // No parseable JSON. Do NOT print the raw reply — qwen3 reasons out loud, often in\n      // English, and a student should never see the model's scratchpad. Salvage only the\n      // Arabic prose, drop section labels, and cap it at a few sentences.\n      feedback = salvage(txt);\n    }\n  } catch (e) { /* LLM branch didn't run — keep the code's provisional mark */ }\n}\nawarded = Math.round(awarded * 100) / 100;\n\nconst ids = parse(prior.question_ids, []);\nconst log = parse(prior.answers_log, []);\nlog.push({\n  question_id: g.question_id,\n  student_answer: g.student_answer,\n  score: awarded,\n  points_max: g.points_max,\n  skipped: Boolean(g.skipped),\n});\n\nconst nextIndex = Number(prior.current_index || 0) + 1;\nconst nextId = ids[nextIndex] || null;\nconst scoreTotal = Math.round((Number(prior.score_total || 0) + awarded) * 100) / 100;\n\nconst row = {\n  session_id: r.session_id,\n  exam_id: prior.exam_id || null,\n  question_ids: JSON.stringify(ids),\n  current_index: nextIndex,\n  current_question_id: nextId,\n  score_total: scoreTotal,\n  points_total: Number(prior.points_total || 0),\n  answers_log: JSON.stringify(log),\n  // 'awaiting_next' = graded, waiting for the student to say yes before the next question\n  status: nextId ? 'awaiting_next' : 'finished',\n  started_at: prior.started_at || now,\n  updated_at: now,\n};\nif (prior.Id != null) row.Id = prior.Id;   // NocoDB updates by Id, not by session_id\n\nreturn [{\n  json: {\n    action: 'grade',\n    session_row: row,\n    result: {\n      awarded,\n      points_max: g.points_max,\n      type: g.type,\n      breakdown: g.breakdown || [],\n      model_answer: g.model_answer || '',\n      feedback,\n      skipped: Boolean(g.skipped),\n    },\n    next_question_id: nextId,\n    finished: !nextId,\n    summary: { answered: log.length, of: ids.length, score: scoreTotal, out_of: Number(prior.points_total || 0) },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        1056
+      ],
+      "id": "ec24eca0-0b10-441b-8ac9-7fe99c1c4086",
+      "name": "Finalize"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nالسؤال:\n{{ $('Grade').item.json.q_prompt }}\n \nإجابة الطالب:\n{{ $('Grade').item.json.student_answer }}\n \nالعلامة القصوى: {{ $('Grade').item.json.points_max }}\nالعدد المطلوب من العناصر: {{ $('Grade').item.json.q_required }}\n \nالعناصر المقبولة (مفصولة بـ |):\n{{ $('Grade').item.json.q_elements }}\n \nمطابقات مبدئية (استرشد بها ولا تناقشها):\n{{ $('Grade').item.json.llm_payload.likely_matches.join(' | ') }}\n \nأخرج الآن الـ JSON وحده.\n ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=\nأنت مصحّح امتحانات تربية وطنية للشهادة الثانوية اللبنانية. مهمتك تقييم إجابة طالب على سؤال مفتوح، ثم شرح النتيجة له بلغة عربية واضحة ومشجّعة.\n\nقواعد التصحيح:\n- معيار التصحيح يعطيك قائمة العناصر المقبولة والعدد المطلوب منها. الطالب لا يحتاج إلى ذكرها كلها — يكفي العدد المطلوب.\n- العنصر يُحتسب صحيحًا إذا ذكره الطالب بالمعنى، ولو بصياغة مختلفة أو بمرادفات. لا تشترط النسخ الحرفي.\n- العلامة = (عدد العناصر الصحيحة، بحد أقصى العدد المطلوب) ÷ العدد المطلوب × العلامة القصوى.\n- لا تمنح علامة لعنصر غير موجود في قائمة العناصر المقبولة، مهما بدا معقولًا.\n- إذا كانت الإجابة فارغة أو خارج الموضوع تمامًا، العلامة صفر.\n\nقواعد الشرح:\n- اذكر أولًا ما أصابه الطالب، ثم ما نقصه.\n- عند النقص، اذكر العناصر التي فاتته حرفيًا كما وردت في معيار التصحيح.\n- جملتان إلى أربع جمل. بلا مقدمات ولا اعتذارات.\n- خاطب الطالب مباشرة بصيغة المخاطب.\n\nشكل الإخراج — هذا هو الجزء الأهم:\n\nأوّل حرف في ردّك يجب أن يكون { وآخر حرف يجب أن يكون }. لا شيء قبلهما ولا بعدهما:\nلا تفكير، لا مقدمة، لا عنوان، لا «التحليل:» ولا «النتيجة:»، ولا علامات ```.\nلا تكتب بالإنكليزية إطلاقًا. لا تشرح لماذا اخترت العلامة خارج حقل feedback.\n\n{\"score\": <رقم>, \"matched\": [<العناصر التي أصابها>], \"missed\": [<العناصر التي فاتته>], \"feedback\": \"<جملتان إلى أربع، بالعربية، موجّهة إلى الطالب>\"}\n\n/no_think\n\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1760,
+        944
+      ],
+      "id": "60ac1c6d-7a63-4f94-b85b-bba5bea848e1",
+      "name": "Feedback LLM"
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ $json.needs_llm ? 0 : 1 }}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1504,
+        1056
+      ],
+      "id": "5d75dbf6-3fea-4af8-b250-969cf0fc1d66",
+      "name": "Needs LLM?"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "search",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mxw555ll2ahgayl",
+          "mode": "list",
+          "cachedResultName": "nocodb_questions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mxw555ll2ahgayl"
+        },
+        "limit": 1,
+        "options": {
+          "where": "=(question_id,eq,{{ ($json.fields || $json).current_question_id || '__none__' }})"
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        2848,
+        1072
+      ],
+      "id": "9adcf6b2-ca34-46df-9686-6a02cef98f87",
+      "name": "Get Next Question",
+      "alwaysOutputData": true,
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Compose Reply     (Code · Run Once for All Items)\n// LAST node on every exam branch — whatever it outputs is what the student sees.\n// All branches converge here, so it works out which one ran.\n// ============================================================\n\n// ---- NocoDB row shape ----------------------------------------------------\n// This NocoDB node wraps every row as { id, id_fields: { Id }, fields: {...} }.\n// Flatten it so columns are readable directly, and lift the primary key to `Id`.\n// Rows that are already flat pass through untouched, so this works either way.\nfunction flat(j) {\n  if (!j || typeof j !== 'object') return {};\n  if (!j.fields || typeof j.fields !== 'object') return j;\n  const out = Object.assign({}, j.fields);\n  if (j.id_fields && j.id_fields.Id != null) out.Id = j.id_fields.Id;\n  else if (j.Id != null) out.Id = j.Id;\n  else if (j.id != null) out.Id = j.id;\n  return out;\n}\n// --------------------------------------------------------------------------\n\nfunction from(name) { try { return $(name).first().json; } catch (e) { return null; } }\n\nconst ask = from('Ask Selection');\nconst start = from('Start Session');\nconst fin = from('Finalize');\nconst nxt = from('Serve Next');\nconst rawNext = from('Get Next Question');\nconst nextQ = rawNext ? flat(rawNext) : null;\n\nconst LETTERS = ['أ', 'ب', 'ج', 'د', 'ه', 'و'];\nconst parse = (v, f) => { if (v == null) return f; if (typeof v !== 'string') return v;\n  try { return JSON.parse(v); } catch (e) { return f; } };\n\n// An answer-format example sized to THIS question. A fixed \"1-د، 2-أ، 3-ه، 4-ج\"\n// shows four pairs and a letter ه on a question that only has two of each.\nfunction hint(n) {\n  const out = [];\n  for (let i = 0; i < n; i++) out.push(`${i + 1}-${LETTERS[i % LETTERS.length]}`);\n  return out.join('\\u060C ');\n}\n\n// Groups are labelled I, II, III — not 1, 2, 3. Showing \"1-أ\" against a question that displays\n// \"I—\" makes the student guess at the format, and on a MULTI-answer question a one-letter\n// example quietly costs them half the marks on every group that wants two.\nfunction groupHint(groups, multi) {\n  const parts = groups.map((g, i) => {\n    const label = g.group_label || String(i + 1);\n    return multi && i === 0 ? `${label}-\\u0623\\u060C\\u0628` : `${label}-${LETTERS[i % LETTERS.length]}`;\n  });\n  return parts.join('\\u060C ');\n}\n\n// ---- render one question the way a student should see it ----\nfunction renderQuestion(q, n, of) {\n  // Get Next Question has Always Output Data on, so an exhausted exam yields an\n  // empty item rather than nothing — treat that as no question.\n  if (!q || !q.question_id) return '';\n  const lines = [];\n  lines.push(`**السؤال ${n} من ${of}** · ${q.points_max} علامة`);\n  if (q.context_text) lines.push(`\\n> ${String(q.context_text).replace(/\\n/g, '\\n> ')}`);\n  lines.push(`\\n${q.prompt_text}`);\n\n  const payload = parse(q.payload, null);\n  if (payload && payload.groups) {\n    payload.groups.forEach(g => {\n      lines.push(`\\n**${g.group_label}—** ${g.group_title}:`);\n      lines.push(g.options.map((o, i) => `${LETTERS[i]}. ${o}`).join('  ·  '));\n    });\n    const multi = q.type === 'mcq_multi';\n    lines.push('\\n_' + (multi ? '\\u0644\\u0643\\u0644 \\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u062D\\u0631\\u0641 \\u0648\\u0627\\u062D\\u062F \\u0623\\u0648 \\u0623\\u0643\\u062B\\u0631. ' : '')\n      + '\\u0627\\u0643\\u062A\\u0628 \\u0625\\u062C\\u0627\\u0628\\u062A\\u0643 \\u0647\\u0643\\u0630\\u0627: ' + groupHint(payload.groups, multi) + '_');\n  } else if (payload && payload.matching_left) {\n    lines.push('');\n    payload.matching_left.forEach((l, i) => lines.push(`${i + 1}. ${l}`));\n    lines.push('');\n    payload.matching_right.forEach((rr, i) => lines.push(`${LETTERS[i]}. ${rr}`));\n    lines.push(`\\n_اكتب إجابتك هكذا: ${hint(payload.matching_left.length)}_`);\n\n  // No payload to show, but these two types still need the student to know the shape.\n  } else if (q.type === 'true_false') {\n    lines.push('\\n_\\u0627\\u0643\\u062A\\u0628 \\u00AB\\u0635\\u062D\\u00BB \\u0623\\u0648 \\u00AB\\u062E\\u0637\\u0623\\u00BB\\u060C '\n      + '\\u0648\\u0625\\u0630\\u0627 \\u0643\\u0627\\u0646\\u062A \\u062E\\u0637\\u0623 \\u0641\\u0627\\u0643\\u062A\\u0628 \\u0627\\u0644\\u062A\\u0635\\u062D\\u064A\\u062D._');\n  } else if (q.type === 'correction') {\n    lines.push('\\n_\\u0627\\u0643\\u062A\\u0628 \\u0627\\u0644\\u0643\\u0644\\u0645\\u0629 \\u0623\\u0648 \\u0627\\u0644\\u0639\\u0628\\u0627\\u0631\\u0629 \\u0627\\u0644\\u0635\\u062D\\u064A\\u062D\\u0629 \\u0628\\u062F\\u0644 \\u0627\\u0644\\u062E\\u0627\\u0637\\u0626\\u0629._');\n  }\n  return lines.join('\\n');\n}\n\nlet text = '';\n\n// ---- branch: ask_selection ----\nif (ask && ask.action === 'ask_selection') {\n  text = ask.reply_text;\n\n// ---- branch: start ----\n} else if (start && start.action === 'start') {\n  if (start.finished) {\n    text = 'لا توجد أسئلة جاهزة لهذا الامتحان بعد.';\n  } else {\n    const ids = parse(start.session_row.question_ids, []);\n    text = `${start.intro}\\n\\n---\\n\\n${renderQuestion(start.next_question, 1, ids.length)}`;\n  }\n\n// ---- branch: grade — feedback + the correct answer, then ask before moving on ----\n} else if (fin && fin.action === 'grade') {\n  const res = fin.result, s = fin.summary;\n  const pct = res.points_max ? res.awarded / res.points_max : 0;\n  const mark = pct >= 0.999 ? '✅' : (pct > 0 ? '🟡' : '❌');\n  const parts = [];\n\n  parts.push(res.skipped\n    ? `تخطّيت هذا السؤال. (0 من ${res.points_max})`\n    : `${mark} **${res.awarded} من ${res.points_max}**`);\n\n  if (res.feedback) parts.push(res.feedback);\n\n  // Always show the model answer — right or wrong, this is the point of practising.\n  if (res.model_answer) parts.push(`**الإجابة النموذجية:**\\n${res.model_answer}`);\n\n  parts.push(`_المجموع: ${s.score} من ${s.out_of} — أجبت ${s.answered} من ${s.of}_`);\n\n  if (fin.finished) {\n    const p = s.out_of ? Math.round(s.score / s.out_of * 100) : 0;\n    parts.push(`---\\n\\n**انتهى الامتحان.** نتيجتك ${s.score} من ${s.out_of} (${p}%).`);\n  } else {\n    parts.push(`---\\n\\nهل تريد الانتقال إلى السؤال التالي؟ اكتب **نعم** للمتابعة، أو اسألني عن هذه الإجابة إذا لم تتضح لك.`);\n  }\n  text = parts.join('\\n\\n');\n\n// ---- branch: serve_next — the student said yes ----\n} else if (nxt && nxt.action === 'serve_next') {\n  const row = nxt.session_row;\n  const ids = parse(row.question_ids, []);\n  text = renderQuestion(nextQ, Number(row.current_index) + 1, ids.length);\n  // Shouldn't happen — serve_next only fires while a next question exists — but an\n  // empty chat bubble is the worst possible failure, so never return one.\n  if (!text) text = 'لم أعثر على السؤال التالي. اكتب **امتحان** للبدء من جديد.';\n\n// ---- branch: finish — the student stopped early ----\n} else if (nxt && nxt.action === 'finish') {\n  const s2 = nxt.summary || { score: 0, out_of: 0, answered: 0, of: 0 };\n  const p = s2.out_of ? Math.round(s2.score / s2.out_of * 100) : 0;\n  text = `**أنهيت الامتحان مبكرًا.**\\n\\nأجبت عن ${s2.answered} من أصل ${s2.of} أسئلة.`\n    + `\\nنتيجتك ${s2.score} من ${s2.out_of} (${p}%).`\n    + `\\n\\nاكتب **امتحان** متى شئت للبدء من جديد.`;\n\n} else {\n  text = 'حدث خطأ غير متوقع. اكتب \"امتحان\" للبدء من جديد.';\n}\n\nif (!text || !String(text).trim()) {\n  text = 'حدث خطأ غير متوقع. اكتب \"امتحان\" للبدء من جديد.';\n}\n\nreturn [{ json: { output: text, text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3056,
+        1072
+      ],
+      "id": "d7151adc-c911-43d0-ad1f-4d918fad4a7c",
+      "name": "Compose Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Serve Next        (Code · Run Once for All Items)\n// Branches: Switch outputs \"serve_next\" AND \"finish\" — both wire into this node.\n//   serve_next → the student said yes. Flip the session back to active;\n//                current_question_id already points at the right question,\n//                Finalize advanced it at grading time.\n//   finish     → the student typed توقف. Close the session out at its current score.\n// ============================================================\n\nconst r = $('Router').first().json;\nconst prior = r.session || {};\nconst finishing = r.action === 'finish';\n\nconst parse = (v, f) => { if (v == null) return f; if (typeof v !== 'string') return v;\n  try { return JSON.parse(v); } catch (e) { return f; } };\nconst ids = parse(prior.question_ids, []);\nconst log = parse(prior.answers_log, []);\n\n// Rebuild the row field by field rather than spreading `prior` — the raw NocoDB\n// row also carries read-only system columns (CreatedAt, UpdatedAt) that the\n// write would choke on.\nconst row = {\n  session_id: prior.session_id,\n  exam_id: prior.exam_id || null,\n  question_ids: prior.question_ids,\n  current_index: Number(prior.current_index || 0),\n  current_question_id: prior.current_question_id,\n  score_total: Number(prior.score_total || 0),\n  points_total: Number(prior.points_total || 0),\n  answers_log: prior.answers_log,\n  status: finishing ? 'finished' : 'active',\n  started_at: prior.started_at,\n  updated_at: new Date().toISOString(),\n};\nif (prior.Id != null) row.Id = prior.Id;\n\nreturn [{\n  json: {\n    action: finishing ? 'finish' : 'serve_next',\n    session_row: row,\n    summary: {\n      answered: log.length,\n      of: ids.length,\n      score: Number(prior.score_total || 0),\n      out_of: Number(prior.points_total || 0),\n    },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        1328
+      ],
+      "id": "c0d69a02-d924-4770-bbfb-b7c8a13608cf",
+      "name": "Serve Next"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Start Session      (Code · Run Once for All Items)\n// Branch: Switch \"start\"  ←  after 'Get Questions'\n// Builds the ordered question list and the first question's text.\n// ============================================================\n\n// ---- NocoDB row shape ----------------------------------------------------\n// This NocoDB node wraps every row as { id, id_fields: { Id }, fields: {...} }.\n// Flatten it so columns are readable directly, and lift the primary key to `Id`.\n// Rows that are already flat pass through untouched, so this works either way.\nfunction flat(j) {\n  if (!j || typeof j !== 'object') return {};\n  if (!j.fields || typeof j.fields !== 'object') return j;\n  const out = Object.assign({}, j.fields);\n  if (j.id_fields && j.id_fields.Id != null) out.Id = j.id_fields.Id;\n  else if (j.Id != null) out.Id = j.Id;\n  else if (j.id != null) out.Id = j.id;\n  return out;\n}\n// --------------------------------------------------------------------------\n\nconst r = $('Router').first().json;\nconst now = new Date().toISOString();\nconst prior = r.session || {};   // the 'selecting' row, when the student got here via a question\n\nconst rows = $('Get Questions').all().map(i => flat(i.json));\n\n// needs_review rows never reach a student — their answer key is known to be wrong.\nconst isClean = v => v === false || v === 'false' || v === 0 || v === '0' || v == null;\nconst ordered = rows\n  .filter(q => q.question_id && isClean(q.needs_review))\n  .sort((a, b) => (Number(a.domain) - Number(b.domain))\n    || String(a.question_id).localeCompare(String(b.question_id)));\n\nconst ids = ordered.map(q => q.question_id);\nconst pointsTotal = Math.round(ordered.reduce((s, q) => s + Number(q.points_max || 0), 0) * 100) / 100;\nconst first = ordered[0] || null;\n\n// Arabic counts don't take a bare numeral the way English does.\nfunction qCount(n) {\n  if (n === 0) return '\\u0644\\u0627 \\u0623\\u0633\\u0626\\u0644\\u0629';                 // لا أسئلة\n  if (n === 1) return '\\u0633\\u0624\\u0627\\u0644 \\u0648\\u0627\\u062d\\u062f';        // سؤال واحد\n  if (n === 2) return '\\u0633\\u0624\\u0627\\u0644\\u0627\\u0646';                      // سؤالان\n  if (n >= 3 && n <= 10) return `${n} \\u0623\\u0633\\u0626\\u0644\\u0629`;              // N أسئلة\n  return `${n} \\u0633\\u0624\\u0627\\u0644\\u064b\\u0627`;                              // N سؤالًا\n}\n\n// Reuse the `selecting` row rather than leaving it orphaned beside a new one.\nconst row = {\n  session_id: r.session_id,\n  exam_id: r.exam_id,\n  question_ids: JSON.stringify(ids),\n  current_index: 0,\n  current_question_id: ids[0] || null,\n  score_total: 0,\n  points_total: pointsTotal,\n  answers_log: JSON.stringify([]),\n  status: ids.length ? 'active' : 'finished',\n  started_at: prior.started_at || now,\n  updated_at: now,\n};\nif (prior.Id != null) row.Id = prior.Id;\n\nreturn [{\n  json: {\n    action: 'start',\n    session_row: row,\n    intro: ids.length === 0\n      ? `لا توجد أسئلة جاهزة لامتحان ${r.year} حاليًا.`\n      : `سنبدأ امتحان ${r.year}. ${qCount(ids.length)}، المجموع ${pointsTotal} علامة.`\n        + (rows.length > ids.length\n          ? ` (استُبعد ${qCount(rows.length - ids.length)} بحاجة إلى مراجعة.)` : ''),\n    next_question: first,\n    finished: ids.length === 0,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        752
+      ],
+      "id": "cf499064-9530-4d7d-9053-98f325fc6999",
+      "name": "Start Session"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "upsert",
+        "workspaceId": {
+          "__rl": true,
+          "value": "weazm79y",
+          "mode": "list",
+          "cachedResultName": "Default Workspace",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y"
+        },
+        "projectId": {
+          "__rl": true,
+          "value": "pfj7v4us637uwii",
+          "mode": "list",
+          "cachedResultName": "Exams",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii"
+        },
+        "table": {
+          "__rl": true,
+          "value": "mnmxnsp5svspyai",
+          "mode": "list",
+          "cachedResultName": "nocodb_exam_sessions",
+          "cachedResultUrl": "http://nocodb:8080/#/weazm79y/pfj7v4us637uwii/mnmxnsp5svspyai"
+        },
+        "id": "={{ $json.session_row.Id }}",
+        "fieldsMapper": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "current_index": "={{ $json.session_row.current_index }}",
+            "score_total": "={{ $json.session_row.score_total }}",
+            "points_total": "={{ $json.session_row.points_total }}",
+            "session_id": "={{ $json.session_row.session_id }}",
+            "exam_id": "={{ $json.session_row.exam_id }}",
+            "question_ids": "={{ $json.session_row.question_ids }}",
+            "current_question_id": "={{ $json.session_row.current_question_id }}",
+            "answers_log": "={{ $json.session_row.answers_log }}",
+            "status": "={{ $json.session_row.status }}",
+            "started_at": "={{ $json.session_row.started_at }}",
+            "updated_at": "={{ $json.session_row.updated_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "exam_id",
+              "displayName": "exam_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "question_ids",
+              "displayName": "question_ids",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "current_index",
+              "displayName": "current_index",
+              "type": "number",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "current_question_id",
+              "displayName": "current_question_id",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score_total",
+              "displayName": "score_total",
+              "type": "number",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "points_total",
+              "displayName": "points_total",
+              "type": "number",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "answers_log",
+              "displayName": "answers_log",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "display": true,
+              "defaultMatch": false,
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [
+        2656,
+        1072
+      ],
+      "id": "4a2501a9-5ce7-494d-8aeb-91b0be1bfc68",
+      "name": "Save Session",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "cXSsprkDxFSZOIja",
+          "name": "NocoDB Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.recordType}}",
+                    "rightValue": "question",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a17bef5e-77ed-4362-a59f-db9ffbb63b85"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "379c4d65-c79c-443f-9817-dde0bf89519b",
+                    "leftValue": "={{$json.recordType}}",
+                    "rightValue": "answer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8b3e94db-5356-4722-b0aa-5b259251462a",
+                    "leftValue": "={{$json.recordType}}",
+                    "rightValue": "material",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -176
+      ],
+      "id": "87791ef9-2a71-4864-8eb3-d5f35a5a2024",
+      "name": "Route1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// NODE NAME: Parse Canonical      (Code · Run Once for All Items)\n// Position: straight after the Google Drive download node.\n// Replaces: LlamaParse + Pre-extraction + Qwen HTTP + Post-extraction.\n// Feeds: the same Switch on `recordType` → questions / answers / materials.\n//\n// Reads a canonical exam markdown (see canonical_format_SPEC.md) and emits the rows\n// directly. There is no model in this path, so there is nothing to hallucinate, nothing\n// to re-run differently tomorrow, and nothing to repair downstream.\n//\n// DESIGN RULE: a file that breaks the spec THROWS. It does not emit a half-row with a\n// flag on it. A flag means \"a human should look at this exam\"; a spec violation means\n// \"the markdown is wrong, go fix the markdown\". Conflating the two is how 2018 shipped\n// fourteen questions with four silently broken answers.\n// ============================================================\n\n// ---------- 0. Get the text out of the Drive node ----------\n// The Drive node hands the file over as BINARY, not text, and how that binary reaches a Code\n// node depends on the instance: with binary data mode \"memory\" the base64 sits on\n// item.binary.<key>.data, but with mode \"filesystem\" — and on some task-runner setups — only\n// metadata comes through (fileName, mimeType, fileSize, id) and there is no base64 at all.\n//\n// So this does not guess. It tries each source in turn, checks that what it got actually looks\n// like a canonical file, and if not it reports exactly what it saw. A wrong guess here used to\n// surface much later as \"the file has no **exam_id:** line\", which points at the markdown when\n// the markdown is fine.\nfunction looksCanonical(t) {\n  return typeof t === 'string' && t.indexOf('**exam_id:**') !== -1;\n}\n\nfunction readSource() {\n  const item = $input.first();\n  const j = item.json || {};\n  const bin = item.binary || {};\n  const tried = [];\n\n  // 1. Already text on the item (an Extract From File node upstream, or a manual paste).\n  for (const field of ['text', 'data', 'content', 'markdown']) {\n    const v = j[field];\n    if (typeof v === 'string' && v.length > 40) {\n      if (looksCanonical(v)) return v;\n      tried.push('json.' + field + ' (' + v.length + ' chars, no **exam_id:**)');\n    }\n  }\n\n  // 2. Binary, base64-decoded. Try every binary property, not just the first.\n  for (const key of Object.keys(bin)) {\n    const b = bin[key] || {};\n    if (typeof b.data === 'string' && b.data.length) {\n      let decoded = '';\n      try { decoded = Buffer.from(b.data, 'base64').toString('utf8'); } catch (e) { decoded = ''; }\n      if (looksCanonical(decoded)) return decoded;\n      // A few characters where a whole file should be is a REFERENCE, not content.\n      tried.push('binary.' + key + (b.data.length < 200\n        ? ' holds only ' + b.data.length + ' characters — that is a reference, not the file.'\n        : ' decoded to ' + decoded.length + ' characters but has no **exam_id:** line: '\n          + JSON.stringify(decoded.slice(0, 120))));\n    } else if (b.id) {\n      tried.push('binary.' + key + ' carries an id and no base64.');\n    } else {\n      tried.push('binary.' + key + ' has neither data nor id: ' + JSON.stringify(Object.keys(b)));\n    }\n  }\n\n  const binaryUnavailable = Object.keys(bin).some(k => {\n    const b = bin[k] || {};\n    return b.id || (typeof b.data === 'string' && b.data.length < 200);\n  });\n\n  throw new Error('Parse Canonical: could not read the canonical markdown off the input item.\\n'\n    + 'json keys: ' + JSON.stringify(Object.keys(j)) + '\\n'\n    + 'binary keys: ' + JSON.stringify(Object.keys(bin)) + '\\n'\n    + (tried.length ? 'tried:\\n  - ' + tried.join('\\n  - ')\n                    : 'nothing on the item looked like text or binary at all.')\n    + (binaryUnavailable\n      ? '\\n\\nThe binary is present but its CONTENT is not. n8n does not hand binary payloads to '\n        + 'Code nodes when they run in a task runner, and the filesystem binary mode has the same '\n        + 'effect. Fix: add an \"Extract From File\" node between the Drive node and this one — '\n        + 'operation \"Extract From Text File\", destination output field \"data\" — and this node '\n        + 'will read the text off json.data.'\n      : ''));\n}\n\nconst SRC = readSource().replace(/\\r\\n/g, '\\n');\n\n// ---------- 1. Small helpers ----------\nconst MARK_RE = /\\((\\d+\\.\\d{1,2})\\)/;                     // (2.00) — the ONLY mark notation\nconst AR_LETTER = '[\\\\u0621-\\\\u064A]';\n\nfunction trim(s) { return String(s == null ? '' : s).trim(); }\nfunction num(s) { return Math.round(parseFloat(s) * 100) / 100; }\nfunction fail(msg) { throw new Error('Parse Canonical: ' + msg); }\n\n// A \"> …\" line is a note for whoever maintains the file — never content. It has to be\n// recognised on the RAW line: clean() strips the marker, so filtering after cleaning lets the\n// note through. The first one in the file landed inside a key block and threw.\nfunction isNote(raw) { return /^\\s*>/.test(String(raw)); }\n\n// Strip the bold markers that only exist for human readers, and collapse a markdown link to its\n// visible text. Editors auto-linkify a bare URL on the way into Drive — 2018's document source\n// went in as \"www.lebarmy.gov.lb\" and came back as \"[www.lebarmy.gov.lb](https://www.lebarmy.gov.lb)\",\n// which is what the student would then have been shown, and what the source key would have been\n// graded against.\nfunction clean(line) {\n  return trim(String(line)\n    .replace(/\\*\\*/g, '')\n    .replace(/\\[([^\\]]+)\\]\\((?:[^)]*)\\)/g, '$1'));\n}\n\n// ---------- 2. File header ----------\nfunction headerField(name) {\n  const m = SRC.match(new RegExp('\\\\*\\\\*' + name + ':\\\\*\\\\*\\\\s*([^\\\\n]+)'));\n  return m ? trim(m[1]) : null;\n}\nconst examId = headerField('exam_id');\nif (!examId) {\n  fail('the file has no exam_id header line. First 200 characters of what was read:\\n'\n    + JSON.stringify(SRC.slice(0, 200)));\n}\nconst year = headerField('\\\\u0627\\\\u0644\\\\u0633\\\\u0646\\\\u0629');          // السنة\nconst fileTotalRaw = headerField('\\\\u0627\\\\u0644\\\\u0645\\\\u062C\\\\u0645\\\\u0648\\\\u0639'); // المجموع\nconst fileTotal = fileTotalRaw && MARK_RE.test(fileTotalRaw)\n  ? num(fileTotalRaw.match(MARK_RE)[1]) : null;\n\n// ---------- 3. Split into domains ----------\n// \"## المجال الأول — على مستوى المعارف — (8.00)\"\nconst DOMAIN_WORDS = {\n  'الأول': 1,\n  'الثاني': 2,\n  'الثالث': 3,\n};\nconst domainHeadRe = /^##\\s+المجال\\s+(\\S+)([^\\n]*)$/gm;\n\nconst domains = [];\nlet dm;\nwhile ((dm = domainHeadRe.exec(SRC)) !== null) {\n  const word = dm[1];\n  const domain = DOMAIN_WORDS[word];\n  if (!domain) fail('unrecognised domain heading \"' + dm[0].trim() + '\".');\n  const mk = dm[2].match(MARK_RE);\n  domains.push({\n    domain,\n    declaredTotal: mk ? num(mk[1]) : null,\n    start: dm.index + dm[0].length,\n    headEnd: dm.index,\n  });\n}\nif (!domains.length) fail('no \"## المجال\" headings found — is this a canonical file?');\ndomains.forEach((d, i) => {\n  d.body = SRC.slice(d.start, i + 1 < domains.length ? domains[i + 1].headEnd : SRC.length);\n});\n\n// ---------- 4. Split a domain into ### blocks ----------\nfunction blocksOf(body) {\n  const out = [];\n  const re = /^###\\s+([^\\n]+)$/gm;\n  let m; const heads = [];\n  while ((m = re.exec(body)) !== null) heads.push({ head: trim(m[1]), start: m.index + m[0].length, at: m.index });\n  heads.forEach((h, i) => {\n    out.push({ head: h.head, body: body.slice(h.start, i + 1 < heads.length ? heads[i + 1].at : body.length) });\n  });\n  return out;\n}\n\n// ---------- 5. Classify a block by its heading ----------\n// \"### 3-أ · إجابة مفتوحة · (1.00)\"  |  \"### مستند رقم (1)\"  |  \"### الوضعية\"\nconst TYPE_WORDS = {\n  'اختيار متعدد': 'mcq',\n  'ربط': 'matching',\n  'اشطب الدخيل': 'odd_one_out',\n  'تصحيح': 'correction',\n  'صح أو خطأ': 'true_false',\n  'إجابة مفتوحة': 'open_reasoning',\n  'استخراج': 'open_reasoning',\n  'تقديم المستندين': 'components',\n  'مكوّنات مطلوبة': 'components',\n  'مكونات مطلوبة': 'components',\n};\nconst DOC_RE = /^\\u0645\\u0633\\u062A\\u0646\\u062F\\s+\\u0631\\u0642\\u0645\\s*\\((\\d+)\\)/;   // مستند رقم (1)\nconst SCENARIO_WORD = 'الوضعية';\n\nfunction classify(head) {\n  if (DOC_RE.test(head)) return { kind: 'document', seq: Number(head.match(DOC_RE)[1]) };\n  if (head.indexOf(SCENARIO_WORD) === 0) return { kind: 'scenario' };\n\n  const parts = head.split('·').map(trim);            // split on \"·\"\n  if (parts.length < 3) fail('question heading is not \"<رقم> · <نوع> · (علامة)\": \"' + head + '\"');\n  const idPart = parts[0];\n  const typeWord = parts[1];\n  const mk = parts[2].match(MARK_RE);\n  if (!mk) fail('question \"' + idPart + '\" has no mark in its heading, or it is not in (0.00) form.');\n\n  const t = TYPE_WORDS[typeWord];\n  if (!t) fail('unknown question type \"' + typeWord + '\" in heading \"' + head + '\".');\n\n  // \"3-أ\" → number 3, sub أ  |  \"1\" → number 1, no sub\n  const im = idPart.match(new RegExp('^(\\\\d+)(?:\\\\s*[-\\\\u2013]\\\\s*(' + AR_LETTER + '))?$'));\n  if (!im) fail('question id \"' + idPart + '\" is not a number or number-letter.');\n  return { kind: 'question', number: Number(im[1]), sub: im[2] || null,\n           typeWord: t, points: num(mk[1]) };\n}\n\n// ---------- 6. Field readers inside a block ----------\nfunction sectionLines(body, label) {\n  // everything after \"**<label>:**\" up to the next \"**…:**\" or blank-line boundary\n  // Stop at the next field, at a horizontal rule, or at the next heading. Without the last two\n  // the final key block in a domain ran on and swallowed the \"---\" separator, which then reached\n  // the key parser as a line of dashes.\n  const re = new RegExp('\\\\*\\\\*' + label + ':\\\\*\\\\*\\\\s*\\\\n?([\\\\s\\\\S]*?)'\n    + '(?=\\\\n\\\\s*\\\\*\\\\*[^*]+:\\\\*\\\\*|\\\\n\\\\s*-{3,}\\\\s*(?:\\\\n|$)|\\\\n\\\\s*#{2,4}\\\\s|$)');\n  const m = body.match(re);\n  if (!m) return null;\n  return m[1].split('\\n')\n    .filter(l => !isNote(l))\n    .map(clean)\n    .filter(l => !/^-{2,}$/.test(l))\n    .map(l => l.replace(/^[-•]\\s*/, ''))\n    .filter(Boolean);\n}\nfunction inlineField(body, label) {\n  const m = body.match(new RegExp('\\\\*\\\\*' + label + ':\\\\*\\\\*\\\\s*([^\\\\n]+)'));\n  return m ? clean(m[1]) : null;\n}\n// The prompt is everything before the first \"**…:**\" field, minus option lists and notes.\nfunction promptOf(body) {\n  const cut = body.search(/\\n\\s*\\*\\*[^*]+:\\*\\*/);\n  const head = (cut === -1 ? body : body.slice(0, cut));\n  return head.split('\\n').filter(l => !isNote(l)).map(clean).filter(Boolean).join('\\n').trim();\n}\n\nconst KEY_LABEL = 'المفتاح';\nconst REQ_LABEL = 'المطلوب';\nconst DISTRACT_LABEL = 'مشتتات';\nconst COL1_LABEL = 'العمود الأول';\nconst COL2_LABEL = 'العمود الثاني';\n\n// ---------- 7. Key parsers, one per shape ----------\n// Answers inside one key line are separated by ، or , or the word و, or just spaces.\nconst SEP = '[\\u060C,\\\\s\\u0648]+';\n\n// \"I = أ، ب (0.50)\"  /  \"أ→3 (0.50)\"  /  \"ج→2،4 (1.00)\"\nfunction parseLabelledKey(lines) {\n  const byLabel = {}, points = {};\n  let sawPoints = false;\n  for (const raw of lines) {\n    const mk = raw.match(MARK_RE);\n    const body = trim(raw.replace(MARK_RE, ''));\n    const m = body.match(new RegExp('^([^=\\\\u2192]+?)\\\\s*(?:=|\\\\u2192)\\\\s*(.+)$'));\n    if (!m) fail('key line is not \"<label> = <answers>\" or \"<label>→<answers>\": \"' + raw + '\"');\n    const label = trim(m[1]);\n    const answers = trim(m[2]).split(new RegExp(SEP)).map(trim).filter(Boolean);\n    if (!answers.length) fail('key line \"' + raw + '\" has no answers.');\n    byLabel[label] = answers.length === 1 ? answers[0] : answers;\n    if (mk) { points[label] = num(mk[1]); sawPoints = true; }\n  }\n  return { byLabel, points: sawPoints ? points : null };\n}\n\n// \"wrong ← correct (0.50)\"\nfunction parseCorrectionKey(lines) {\n  const out = {};\n  lines.forEach((raw, i) => {\n    const body = trim(raw.replace(MARK_RE, ''));\n    const m = body.match(/^(.+?)\\s*(?:←|<-)\\s*(.+)$/);\n    if (!m) fail('correction key line must be \"<wrong> ← <correct>\": \"' + raw + '\"');\n    out[String(i + 1)] = { wrong: trim(m[1]), correct: trim(m[2]) };\n  });\n  return out;\n}\n\n// \"صح\"  /  \"خطأ: <the corrected wording>\"\nfunction parseVerdictKey(lines) {\n  if (lines.length !== 1) fail('a صح/خطأ key must be exactly one line.');\n  const m = lines[0].match(/^(صح|خطأ)\\s*(?::\\s*(.+))?$/);\n  if (!m) fail('صح/خطأ key must read \"صح\" or \"خطأ: <correction>\": \"' + lines[0] + '\"');\n  return { verdict: m[1], wrong: null, correct: m[2] ? trim(m[2]) : null };\n}\n\n// \"المستند رقم (1) — النوع: نص قانوني (0.25)\"   (group is optional)\nfunction parseComponentsKey(lines) {\n  const groups = new Map();\n  for (const raw of lines) {\n    const mk = raw.match(MARK_RE);\n    const body = trim(raw.replace(MARK_RE, ''));\n    let group = null, rest = body;\n    const gm = body.match(/^(.+?)\\s+—\\s+(.+)$/);       // em dash separates group from label\n    if (gm) { group = trim(gm[1]); rest = trim(gm[2]); }\n    const cm = rest.match(/^([^:]{1,60}):\\s*(.+)$/);\n    if (!cm) fail('component key line must be \"<label>: <value>\": \"' + raw + '\"');\n    const k = group || '';\n    if (!groups.has(k)) groups.set(k, { group: group, components: [] });\n    groups.get(k).components.push({\n      label: trim(cm[1]), value: trim(cm[2]), points: mk ? num(mk[1]) : null,\n    });\n  }\n  return Array.from(groups.values());\n}\n\n// ---------- 8. Walk the file ----------\nconst records = [];\nconst seenIds = new Set();\nconst domainSums = [];\n\nfor (const d of domains) {\n  let sum = 0;\n  const blocks = blocksOf(d.body);\n  if (!blocks.length) fail('domain ' + d.domain + ' has no ### blocks.');\n\n  for (const b of blocks) {\n    const c = classify(b.head);\n\n    if (c.kind === 'document' || c.kind === 'scenario') {\n      const text = b.body.split('\\n').filter(l => !isNote(l)).map(clean).filter(Boolean).join('\\n').trim();\n      if (!text) fail('material \"' + b.head + '\" is empty.');\n      records.push({\n        recordType: 'material',\n        material_id: c.kind === 'document'\n          ? examId + '_d' + d.domain + '_doc' + c.seq\n          : examId + '_d' + d.domain + '_scenario',\n        exam_id: examId,\n        domain: d.domain,\n        kind: c.kind,\n        seq: c.kind === 'document' ? c.seq : 1,\n        text,\n      });\n      continue;\n    }\n\n    // ----- question -----\n    // Domain 1 numbers EXERCISES; domains 2 and 3 number questions. That is the id scheme\n    // already in NocoDB (civic_2019_2_d1_ex3_qxأ vs civic_2019_2_d2_q2أ) and changing it\n    // would orphan every existing row rather than update it.\n    const qid = d.domain === 1\n      ? examId + '_d1_ex' + c.number + '_qx' + (c.sub || '')\n      : examId + '_d' + d.domain + '_q' + c.number + (c.sub || '');\n    if (seenIds.has(qid)) fail('duplicate question id \"' + qid + '\".');\n    seenIds.add(qid);\n\n    const keyLines = sectionLines(b.body, KEY_LABEL);\n    if (!keyLines || !keyLines.length) fail('question \"' + qid + '\" has no **المفتاح:** block.');\n    const reqRaw = inlineField(b.body, REQ_LABEL);\n    const required = reqRaw && /^\\d+$/.test(reqRaw) ? Number(reqRaw) : null;\n\n    let type = c.typeWord, correct = null, payload = null;\n\n    if (c.typeWord === 'matching') {\n      type = 'matching';\n      const { byLabel, points } = parseLabelledKey(keyLines);\n      correct = { by_label: byLabel };\n      if (points) correct.by_label_points = points;\n      const left = sectionLines(b.body, COL1_LABEL) || [];\n      const right = sectionLines(b.body, COL2_LABEL) || [];\n      if (!left.length || !right.length) fail('matching \"' + qid + '\" is missing a column.');\n      // Strip \"1) \" / \"أ) \" — Compose Reply assigns the display label from position, so leaving\n      // it in the text renders \"1. 1) المجلس الدستوري\". Order is preserved, so the label the\n      // student sees still matches the one the key uses.\n      const stripLabel = t => trim(String(t)\n        .replace(new RegExp('^(?:\\\\d{1,2}|' + AR_LETTER + ')\\\\s*[)\\\\-\\\\u2013.]\\\\s*'), ''));\n      payload = { matching_left: left.map(stripLabel), matching_right: right.map(stripLabel) };\n      const dis = inlineField(b.body, DISTRACT_LABEL);\n      if (dis) payload.distractors = dis.split(new RegExp(SEP)).map(trim).filter(Boolean);\n\n    } else if (c.typeWord === 'mcq' || c.typeWord === 'odd_one_out') {\n      const { byLabel, points } = parseLabelledKey(keyLines);\n      const multi = Object.values(byLabel).some(v => Array.isArray(v));\n      type = c.typeWord === 'odd_one_out' ? 'odd_one_out' : (multi ? 'mcq_multi' : 'mcq_single');\n      correct = { by_label: byLabel };\n      if (points) correct.by_label_points = points;\n      // Option groups for the renderer: \"**المجموعة I — <title>:**\" then \"- أ) <option>\"\n      const groups = [];\n      const gre = /\\*\\*المجموعة\\s+(\\S+)\\s*—\\s*([^*]+?):?\\*\\*([\\s\\S]*?)(?=\\*\\*المجموعة|\\*\\*[^*]+:\\*\\*|$)/g;\n      let gm;\n      while ((gm = gre.exec(b.body)) !== null) {\n        groups.push({\n          group_label: trim(gm[1]),\n          group_title: trim(gm[2]),\n          options: gm[3].split('\\n').filter(l => !isNote(l)).map(clean)\n            .filter(l => /^[-•]/.test(l) || new RegExp('^' + AR_LETTER + '\\\\s*\\\\)').test(l))\n            .map(l => trim(l.replace(/^[-•]\\s*/, '').replace(new RegExp('^' + AR_LETTER + '\\\\s*\\\\)\\\\s*'), '')))\n            .filter(Boolean),\n        });\n      }\n      if (groups.length) payload = { groups };\n\n    } else if (c.typeWord === 'correction') {\n      type = 'correction';\n      correct = parseCorrectionKey(keyLines);\n\n    } else if (c.typeWord === 'true_false') {\n      type = 'true_false';\n      correct = parseVerdictKey(keyLines);\n\n    } else if (c.typeWord === 'components') {\n      type = 'open_reasoning';\n      correct = { required_components: parseComponentsKey(keyLines) };\n\n    } else {\n      type = 'open_reasoning';\n      correct = { acceptable_elements: keyLines, required_count: required || keyLines.length };\n      if (required && required > keyLines.length) {\n        fail('question \"' + qid + '\" asks for ' + required + ' but its key lists only '\n          + keyLines.length + '.');\n      }\n    }\n\n    sum += c.points;\n    records.push({\n      recordType: 'question',\n      question_id: qid,\n      exam_id: examId,\n      year,\n      domain: d.domain,\n      type,\n      points_max: c.points,\n      prompt_text: promptOf(b.body),\n      payload,\n      // A canonical file has nothing for a human to review. What remains is a GRADING gap:\n      // nothing can score a multi-answer item yet, so those rows stay out of the exam.\n      needs_review: false,\n      review_notes: '',\n    });\n    records.push({\n      recordType: 'answer',\n      question_id: qid,\n      correct_answer: correct,\n      rubric_raw: keyLines.join('\\n'),\n    });\n  }\n\n  domainSums.push({ domain: d.domain, sum: Math.round(sum * 100) / 100, declared: d.declaredTotal });\n}\n\n// ---------- 9. The audit that was impossible before ----------\n// The old node ran Once for Each Item with one item per domain, so it could never see the\n// paper as a whole. This one reads the file, so it can check both halves of the arithmetic —\n// which is the only defence against a typo in a hand-written canonical file.\nfor (const ds of domainSums) {\n  if (ds.declared != null && Math.abs(ds.sum - ds.declared) > 0.001) {\n    fail('domain ' + ds.domain + ' questions sum to ' + ds.sum\n      + ' but its heading declares ' + ds.declared + '.');\n  }\n}\nconst grand = Math.round(domainSums.reduce((a, x) => a + x.sum, 0) * 100) / 100;\nif (fileTotal != null && Math.abs(grand - fileTotal) > 0.001) {\n  fail('the paper sums to ' + grand + ' but **المجموع:** declares ' + fileTotal + '.');\n}\n\nreturn records.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -160
+      ],
+      "id": "3616e07e-cde5-4189-80d4-097f3409a3f8",
+      "name": "Parser"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        -160
+      ],
+      "id": "9535bd06-3631-4fd8-8a9f-2b4a04a6dc91",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Chroma Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Chroma Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Questions": {
+      "main": [
+        [
+          {
+            "node": "Start Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Question": {
+      "main": [
+        [
+          {
+            "node": "Get Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Answer": {
+      "main": [
+        [
+          {
+            "node": "Grade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask Selection",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Questions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Question",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Serve Next",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Serve Next",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session": {
+      "main": [
+        [
+          {
+            "node": "Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Exams": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "List Exams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grade": {
+      "main": [
+        [
+          {
+            "node": "Needs LLM?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Feedback LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs LLM?": {
+      "main": [
+        [
+          {
+            "node": "Feedback LLM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Finalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback LLM": {
+      "main": [
+        [
+          {
+            "node": "Finalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Next Question": {
+      "main": [
+        [
+          {
+            "node": "Compose Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Selection": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serve Next": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session": {
+      "main": [
+        [
+          {
+            "node": "Get Next Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Session": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route1": {
+      "main": [
+        [
+          {
+            "node": "Questions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answers",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Materials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser": {
+      "main": [
+        [
+          {
+            "node": "Route1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "330f053a-bdd0-44c9-ad1d-ca63ec264b75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c965d3155f17b45e6664e548cbf0ada59e490399b10cc5050fe0dbc90f74a1f"
+  },
+  "nodeGroups": [],
+  "id": "D2aPeV5Ftkw2PCa2",
+  "tags": []
+}
